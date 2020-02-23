@@ -32,10 +32,13 @@ type Grid = {
     rows: number
     cells: string[]
     onCellClick: (index: number) => void
+    onCellEnter: (index: number) => void
+    onCellUp: (index: number) => void
+    onCellDown: (index: number) => void
     mouseDown: boolean
 }
 
-export const Grid = ({cols, rows, cells, onCellClick, mouseDown}: Grid) => {
+export const Grid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp, onCellDown}: Grid) => {
     const classes = useStyles()
 
     // Go through each col in a row
@@ -46,11 +49,15 @@ export const Grid = ({cols, rows, cells, onCellClick, mouseDown}: Grid) => {
             let color = cells[cellIndex]
             rowCells.push(<div className={classes.cell} key={cellIndex} style={{backgroundColor: `${color}`}}
                                onMouseDown={() => {
-                                   onCellClick(cellIndex)
+                                   onCellDown(cellIndex)
+                               }}
+
+                               onMouseUp={() => {
+                                   onCellUp(cellIndex)
                                }}
                                onClick={() => onCellClick(cellIndex)}
                                onMouseEnter={() => {
-                                   if (mouseDown) onCellClick(cellIndex)
+                                   onCellEnter(cellIndex)
                                }}>
                 <div className={classes.cellContent}>{cellIndex}</div>
             </div>)
