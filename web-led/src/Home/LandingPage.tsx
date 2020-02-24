@@ -15,7 +15,7 @@ const useStyles = makeStyles({
     mainPage: {
         display: 'flex',
         height: '100%',
-        width: '100%'
+        width: '100%',
     },
     sidePanel: {
         alignContent: 'center',
@@ -25,7 +25,7 @@ const useStyles = makeStyles({
     },
     drawer: {
         display: 'flex',
-        flex: '1 1 0',
+        flex: '1 0 0',
         alignContent: 'center',
         flexFlow: 'column',
     },

@@ -7,15 +7,24 @@ const useStyles = makeStyles({
     snapshots: {
         display: 'flex',
         width: '100%',
-        minWidth: '200px',
-        height: '50%',
-        border: '2px solid pink'
+        height: '100%',
+        border: '2px solid pink',
+        overflowX: 'scroll',
+        maxWidth: '100%',
     },
     snapshot: {
         border: '2px solid',
+        maxWidth: '25%',
+        minWidth: '50px',
+        display: 'flex',
     },
     closeSnapshot: {
         position: 'absolute',
+        cursor: 'pointer'
+    },
+    snapshotIcon: {
+        display: 'flex',
+        flex: '1 0 0'
     }
 })
 
@@ -75,11 +84,14 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
         })
     }
 
+    const getVisibleColor = (baseColor: string) => {
+        return
+
+    }
     const execute = () => {
         // I have to set the callback for each item to the callback of the last timer. So iterate and by index set the next callback
         // setTimeouts
         let remainingDuration = totalDuration
-        console.log(remainingDuration)
         for (let i = snapshots.length - 1; i > -1; i--) {
             const {duration, executeOnStart} = snapshots[i]
             remainingDuration -= duration
@@ -88,7 +100,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     }
 
     return (
-        <div>
+        <div style={{width: '100%'}}>
             {add &&
             <>
                 <TextField type="number" value={duration}
@@ -101,11 +113,15 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                     const {duration, setState} = snapshot
                     return (<div className={classes.snapshot}
                                  style={{width: `${Math.floor((duration / totalDuration) * 100)}%`}}
-                                 onClick={setState}>
-                            <div className={classes.closeSnapshot} onClick={() => {deleteSnapshot(index)}}>x</div>
-                            {snapshot.icon}
+                        >
+                            <div className={classes.closeSnapshot} onClick={(event) => {
+                                event.preventDefault()
+                                deleteSnapshot(index)
+                            }}>x
+                            </div>
+                            <div className={classes.snapshotIcon} onClick={setState}>{snapshot.icon}</div>
                         </div>
-                        )
+                    )
                 })
                 }
             </div>
