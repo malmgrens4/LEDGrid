@@ -47,11 +47,11 @@ const initialCells: string[] = []
 
 for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-        initialCells.push('#ff0000')
+        initialCells.push('#000000')
     }
 }
 
-const url = 'http://192.168.0.228/colors/'
+const url = 'http://72.217.68.14:3000/colors'
 
 const submitGridRequest = (curCells: string[]) => {
     const params = curCells.map(cell => cell.substring(1)).join(',')
@@ -124,17 +124,22 @@ export const LandingPage = () => {
     const [redoStack, setRedoStack] = useState<any[]>([])
     const [currentImage, setCurrentImage] = useState<number[]>([])
     const [dragging, setDragging] = useState<boolean>()
-
+    const [showShortcuts, setShowShortcuts] = useState<boolean>(false)
     // so when I start dragging I want to have a snapshot of the cells so my undo isn't just a series of individual cells but the whole stroke
     // So when the drag starts I need an event - when does the drag start?
     // As soon as it leaves the first cell clicked with the mouse still down
     // Then when someone undoes it I need to add a redo that reflects the current state (a callback that can setTheCells)
 
-    const keyPress = (event: KeyboardEvent) => {
+    const keyDown = (event: KeyboardEvent) => {
         console.log(`${event.ctrlKey} ${event.key}`)
         //CTRL-Z
         const ctrl = event.metaKey || event.ctrlKey
         const key = event.key
+
+        if (ctrl) {
+            setShowShortcuts(true)
+        }
+
         if ((ctrl && event.shiftKey && key === 'z') || (ctrl && key === 'y')) {
             redo()
         } else if (ctrl && key === 'z') {
@@ -142,12 +147,30 @@ export const LandingPage = () => {
             undo()
         } else if (event.shiftKey) {
             //grab object mode
+        } else if (key === 'm') {
+            setTool('BRUSH')
+        } else if (key === 'b') {
+            setTool('BUCKET')
+        } else if (key === 'e') {
+            setTool('EYEDROP')
         }
     }
 
+    const keyUp = (event: KeyboardEvent) => {
+        const ctrl = event.metaKey || event.ctrlKey
+        console.log("key up")
+        if (!ctrl) {
+            setShowShortcuts(false)
+        }
+    }
+
+
+    useEventListener('keydown', keyDown)
+    useEventListener('keyup', keyUp)
+
     const undo = () => {
         // if we want to redo well be returning to the current state
-        if(undoStack.length > 0) {
+        if (undoStack.length > 0) {
             setRedoStack(stack => {
                 const newRedoStack = stack.slice()
                 newRedoStack.push(() => setCells(cells.slice()))
@@ -165,7 +188,7 @@ export const LandingPage = () => {
 
     const redo = () => {
         // if we want to redo well be returning to the current state
-        if(redoStack.length > 0) {
+        if (redoStack.length > 0) {
             setUndoStack(stack => {
                 const newUndoStack = stack.slice()
                 newUndoStack.push(() => setCells(cells.slice()))
@@ -180,8 +203,6 @@ export const LandingPage = () => {
         }
 
     }
-
-    useEventListener('keydown', keyPress)
 
     const setCellColor = (index: number) => {
         setCells(oldCells => {
@@ -209,7 +230,10 @@ export const LandingPage = () => {
             case "BUCKET":
                 return bucketPaint
             case "EYEDROP":
-                return setColorByCell
+                return (index: number) => {
+                    setColorByCell(index)
+                    setTool("BRUSH")
+                }
             default:
                 return setCellColor
         }
@@ -220,10 +244,10 @@ export const LandingPage = () => {
 
         setUndoStack(stack => {
             const newUndoStack = stack.slice()
-                newUndoStack.push(() => {
-                    setCells(cells.slice())
-                })
-                return newUndoStack
+            newUndoStack.push(() => {
+                setCells(cells.slice())
+            })
+            return newUndoStack
         })
 
         setCellHistory(history => {
@@ -279,6 +303,16 @@ export const LandingPage = () => {
         })
     }
 
+    const clearCells = () => {
+        const newCells = []
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                newCells.push('#000000')
+            }
+        }
+        setCells(newCells)
+    }
+
     return (
         <div className={classes.mainPage}>
             {sideOpen &&
@@ -290,17 +324,23 @@ export const LandingPage = () => {
                         }}/>
                         <div className={classes.tools}>
                             <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
-                                    onClick={() => setTool("BUCKET")}><FormatColorFillIcon/></Button>
+                                    onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'b'}
+                            </Button>
                             <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
-                                    onClick={() => setTool("BRUSH")}><BrushIcon/></Button>
+                                    onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'm'} </Button>
                             <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
-                                    onClick={() => setTool("EYEDROP")}><ColorizeIcon/></Button>
+                                    onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}</Button>
                         </div>
                     </div>
                     <Button variant="outlined" color="primary" onClick={() => submitGridRequest(cells)}>Set
                         LEDs</Button>
+
+                    <Button variant="outlined" color="primary" onClick={clearCells}>Clear
+                        LEDs</Button>
+
                     <Button variant="outlined" color="primary"
                             onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}</Button>
+
                     <Timebin setState={() => {
                         setCells(cells.slice())
                     }} loop={loop} executeOnStart={() => {
@@ -314,7 +354,8 @@ export const LandingPage = () => {
                 setMouseDown(true)
             }} onMouseUp={() => setMouseDown(false)}
                    onMouseLeave={() => setMouseDown(false)}>
-                <Grid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()} onCellDown={getOnCellDown()} onCellClick={getOnClick()}
+                <Grid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
+                      onCellDown={getOnCellDown()} onCellClick={getOnClick()}
                       mouseDown={mouseDown}/>
             </Paper>
         </div>
