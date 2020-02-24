@@ -1,7 +1,7 @@
 import React, {ReactElement, useState} from 'react'
 import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
-import { makeStyles } from '@material-ui/styles'
+import {makeStyles} from '@material-ui/styles'
 
 const useStyles = makeStyles({
     snapshots: {
@@ -13,6 +13,9 @@ const useStyles = makeStyles({
     },
     snapshot: {
         border: '2px solid',
+    },
+    closeSnapshot: {
+        position: 'absolute',
     }
 })
 
@@ -64,6 +67,14 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
         return total + snapshot.duration
     }, 0)
 
+    const deleteSnapshot = (index: number) => {
+        setSnapshots(oldSnapshots => {
+            const newSnapshots = oldSnapshots.slice()
+            newSnapshots.splice(index, 1)
+            return newSnapshots
+        })
+    }
+
     const execute = () => {
         // I have to set the callback for each item to the callback of the last timer. So iterate and by index set the next callback
         // setTimeouts
@@ -86,9 +97,15 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
             </>
             }
             <div className={classes.snapshots}>
-                {snapshots.map((snapshot: Snapshot) => {
+                {snapshots.map((snapshot: Snapshot, index: number) => {
                     const {duration, setState} = snapshot
-                    return (<div className={classes.snapshot} style={{width: `${Math.floor((duration / totalDuration) * 100)}%`}} onClick={setState}>{snapshot.icon}</div>)
+                    return (<div className={classes.snapshot}
+                                 style={{width: `${Math.floor((duration / totalDuration) * 100)}%`}}
+                                 onClick={setState}>
+                            <div className={classes.closeSnapshot} onClick={() => {deleteSnapshot(index)}}>x</div>
+                            {snapshot.icon}
+                        </div>
+                        )
                 })
                 }
             </div>
