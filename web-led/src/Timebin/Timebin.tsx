@@ -27,10 +27,11 @@ type Timebin = {
     executeOnStart: () => void
     setState: () => void
     loop: boolean
+    icon: any
 }
 
 
-export const Timebin = ({executeOnStart, setState, loop}: Timebin) => {
+export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     // so this needs to hold instances of the grid -
     // it needs to be snapshots that when played will update the led grid
     // when play is hit it runs through them with the provided time interval
@@ -51,7 +52,7 @@ export const Timebin = ({executeOnStart, setState, loop}: Timebin) => {
 
     const addSnapshot = () => {
         setSnapshots((oldSnapshots: any) => {
-            const newSnapshot = {duration, icon: duration, setState, executeOnStart}
+            const newSnapshot = {duration, icon, setState, executeOnStart}
             const newSnapshots = oldSnapshots.slice()
             console.log(newSnapshots)
             newSnapshots.push(newSnapshot)

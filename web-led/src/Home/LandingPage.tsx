@@ -9,6 +9,7 @@ import BrushIcon from '@material-ui/icons/Brush';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import {Timebin} from '../Timebin/Timebin'
 import {useEventListener} from "../EventListenerHook/eventListener";
+import {JustGrid} from "../JustGrid/JustGrid";
 
 const useStyles = makeStyles({
     mainPage: {
@@ -345,7 +346,7 @@ export const LandingPage = () => {
                         setCells(cells.slice())
                     }} loop={loop} executeOnStart={() => {
                         submitGridRequest(cells.slice())
-                    }}/>
+                    }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
 
                 </div>
             </Paper>
