@@ -2,6 +2,7 @@ import React, {ReactElement, useState} from 'react'
 import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
+import AddIcon from '@material-ui/icons/Add';
 
 const useStyles = makeStyles({
     snapshots: {
@@ -10,6 +11,7 @@ const useStyles = makeStyles({
         height: '100%',
         border: '2px solid pink',
         overflowX: 'scroll',
+        overflowY: 'hidden',
         maxWidth: '100%',
     },
     snapshot: {
@@ -25,6 +27,13 @@ const useStyles = makeStyles({
     snapshotIcon: {
         display: 'flex',
         flex: '1 0 0'
+    },
+    addSnapshot: {
+        display: 'flex',
+        height: '100%',
+        width: '100%',
+        alignContent: 'center',
+        justifyContent: 'center'
     }
 })
 
@@ -86,8 +95,8 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
 
     const getVisibleColor = (baseColor: string) => {
         return
-
     }
+
     const execute = () => {
         // I have to set the callback for each item to the callback of the last timer. So iterate and by index set the next callback
         // setTimeouts
@@ -124,6 +133,8 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                     )
                 })
                 }
+                <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+
             </div>
             <Button variant="outlined" color="primary" onClick={execute}>Run animation</Button>
         </div>
