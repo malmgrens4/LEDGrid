@@ -27,7 +27,7 @@ const useStyles = makeStyles({
     }
 })
 
-type Grid = {
+type PixelGrid = {
     cols: number
     rows: number
     cells: string[]
@@ -38,7 +38,7 @@ type Grid = {
     mouseDown: boolean
 }
 
-export const Grid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp, onCellDown}: Grid) => {
+export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp, onCellDown}: PixelGrid) => {
     const classes = useStyles()
 
     // Go through each col in a row

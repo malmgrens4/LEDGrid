@@ -3,7 +3,8 @@ import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
 import AddIcon from '@material-ui/icons/Add';
-
+import Grid from "@material-ui/core/Grid";
+import Paper from '@material-ui/core/Paper'
 const useStyles = makeStyles({
     snapshots: {
         display: 'flex',
@@ -16,8 +17,6 @@ const useStyles = makeStyles({
     },
     snapshot: {
         border: '2px solid',
-        maxWidth: '25%',
-        minWidth: '50px',
         display: 'flex',
     },
     closeSnapshot: {
@@ -109,35 +108,33 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     }
 
     return (
-        <div style={{width: '100%'}}>
-            {add &&
-            <>
-                <TextField type="number" value={duration}
-                           onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDuration(parseInt(event.target.value))}/>
-                <Button onClick={addSnapshot}>(ms) Add</Button>
-            </>
-            }
-            <div className={classes.snapshots}>
-                {snapshots.map((snapshot: Snapshot, index: number) => {
-                    const {duration, setState} = snapshot
-                    return (<div className={classes.snapshot}
-                                 style={{width: `${Math.floor((duration / totalDuration) * 100)}%`}}
-                        >
-                            <div className={classes.closeSnapshot} onClick={(event) => {
-                                event.preventDefault()
-                                deleteSnapshot(index)
-                            }}>x
-                            </div>
-                            <div className={classes.snapshotIcon} onClick={setState}>{snapshot.icon}</div>
-                        </div>
-                    )
-                })
-                }
-                <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+        <Grid container style={{width: '100%', height: '100%', border: '2px solid'}}>
+            {/*{add &&*/}
+            {/*<Grid item>*/}
+                {/*<TextField type="number" value={duration}*/}
+                           {/*onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDuration(parseInt(event.target.value))}/>*/}
+                {/*<Button onClick={addSnapshot}>(ms) Add</Button>*/}
+            {/*</Grid>*/}
+            {/*}*/}
+            <Grid item>
+                <Grid container direction="column">
+                    {snapshots.map((snapshot: Snapshot, index: number) => {
+                        const {duration, setState} = snapshot
+                        return (
+                            <Grid item xs={2}>
 
-            </div>
-            <Button variant="outlined" color="primary" onClick={execute}>Run animation</Button>
-        </div>
+                                <div style={{height:'100%', width: '100%'}} onClick={setState}>{snapshot.icon}</div>
+                            </Grid>
+                        )
+                    })}
+                    <Grid xs={1} item onClick={addSnapshot}>
+                        <AddIcon/>
+                    </Grid>
+
+                </Grid>
+            </Grid>
+            {/*<Button variant="outlined" color="primary" onClick={execute}>Run animation</Button>*/}
+        </Grid>
     )
 
 }

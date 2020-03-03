@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Grid} from '../Grid/Grid';
+import { PixelGrid } from '../PixelGrid/PixelGrid';
+import Grid from '@material-ui/core/Grid'
 import {SketchPicker} from 'react-color'
 import {makeStyles} from "@material-ui/styles";
 import Paper from '@material-ui/core/Paper'
@@ -21,7 +22,7 @@ const useStyles = makeStyles({
         alignContent: 'center',
         display: 'flex',
         borderRight: '2px solid',
-        padding: '8px'
+        padding: '8px',
     },
     drawer: {
         display: 'flex',
@@ -52,7 +53,7 @@ for (let i = 0; i < rows; i++) {
     }
 }
 
-const url = 'http://72.217.68.14:3000/colors'
+const url = 'http://72.217.68.14:25566/colors'
 
 const submitGridRequest = (curCells: string[]) => {
     const params = curCells.map(cell => cell.substring(1)).join(',')
@@ -209,6 +210,7 @@ export const LandingPage = () => {
         setCells(oldCells => {
             const newCells = oldCells.slice();
             newCells[index] = color
+            submitGridRequest(newCells)
             return newCells
         })
     }
@@ -315,51 +317,65 @@ export const LandingPage = () => {
     }
 
     return (
-        <div className={classes.mainPage}>
+        <Grid container alignItems="stretch" style={{height: '100%'}}>
             {sideOpen &&
-            <Paper className={classes.sidePanel}>
-                <div className={classes.drawer}>
-                    <div style={{display: 'flex'}}>
-                        <SketchPicker color={color} onChange={(newColor: any) => {
-                            setColor(newColor.hex)
-                        }}/>
-                        <div className={classes.tools}>
-                            <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
-                                    onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'b'}
-                            </Button>
-                            <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
-                                    onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'm'} </Button>
-                            <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
-                                    onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}</Button>
-                        </div>
-                    </div>
-                    <Button variant="outlined" color="primary" onClick={() => submitGridRequest(cells)}>Set
-                        LEDs</Button>
+            <Grid item xs={3}>
+                <Grid container>
+                    <Grid item xs={9}>
+                        <Grid container direction="row">
+                            <SketchPicker color={color} onChange={(newColor: any) => {
+                                setColor(newColor.hex)
+                            }}/>
+                            <Grid item>
+                                <Grid container direction="column">
+                                    <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
+                                            onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'b'}
+                                    </Button>
+                                    <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
+                                            onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'm'} </Button>
+                                    <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
+                                            onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}</Button>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid container>
+                            <Grid item>
+                                <Button variant="outlined" color="primary" onClick={() => submitGridRequest(cells)}>
+                                    Set LEDs
+                                </Button>
+                                </Grid>
+                            <Grid item>
+                                <Button variant="outlined" color="primary" onClick={clearCells}>
+                                    Clear LEDs
+                                </Button>
+                            </Grid>
+                            <Grid item>
+                                <Button variant="outlined" color="primary"
+                                    onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Timebin setState={() => {
+                            setCells(cells.slice())
+                        }} loop={loop} executeOnStart={() => {
+                            submitGridRequest(cells.slice())
+                        }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
 
-                    <Button variant="outlined" color="primary" onClick={clearCells}>Clear
-                        LEDs</Button>
-
-                    <Button variant="outlined" color="primary"
-                            onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}</Button>
-
-                    <Timebin setState={() => {
-                        setCells(cells.slice())
-                    }} loop={loop} executeOnStart={() => {
-                        submitGridRequest(cells.slice())
-                    }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
-
-                </div>
-            </Paper>
+                    </Grid>
+                </Grid>
+            </Grid>
             }
-            <Paper className={classes.mainPanel} onMouseDown={() => {
-                setMouseDown(true)
-            }} onMouseUp={() => setMouseDown(false)}
-                   onMouseLeave={() => setMouseDown(false)}>
-                <Grid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
-                      onCellDown={getOnCellDown()} onCellClick={getOnClick()}
-                      mouseDown={mouseDown}/>
-            </Paper>
-        </div>
+            <Grid alignItems="stretch" item xs={9}>
+                    <Paper style={{height: '100%'}} className={classes.mainPanel} onMouseDown={() => { setMouseDown(true) }} onMouseUp={() => setMouseDown(false)}
+                           onMouseLeave={() => setMouseDown(false)}>
+                        <PixelGrid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
+                              onCellDown={getOnCellDown()} onCellClick={getOnClick()}
+                              mouseDown={mouseDown}/>
+                    </Paper>
+            </Grid>
+        </Grid>
     )
 
 }
