@@ -1,27 +1,28 @@
-import React, {ReactElement, useState} from 'react'
+import React, {ReactElement, useState, useRef, useEffect} from 'react'
 import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
 import AddIcon from '@material-ui/icons/Add';
-import Grid from "@material-ui/core/Grid";
-import Paper from '@material-ui/core/Paper'
+import Grid from '@material-ui/core/Grid';
+import { useEventListener } from "../EventListenerHook/eventListener";
+
 const useStyles = makeStyles({
     snapshots: {
-        display: 'flex',
-        width: '100%',
-        height: '100%',
         border: '2px solid pink',
-        overflowX: 'scroll',
-        overflowY: 'hidden',
-        maxWidth: '100%',
+        display: 'flex',
+        flexFlow: 'column',
+        height: '100%',
+        position: 'relative',
     },
     snapshot: {
         border: '2px solid',
         display: 'flex',
+        height: '8vw',
+        width: '8vw'
     },
     closeSnapshot: {
-        position: 'absolute',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        position: 'absolute'
     },
     snapshotIcon: {
         display: 'flex',
@@ -29,15 +30,13 @@ const useStyles = makeStyles({
     },
     addSnapshot: {
         display: 'flex',
-        height: '100%',
-        width: '100%',
-        alignContent: 'center',
+        height: '8vw',
+        width: '8vw',
         justifyContent: 'center'
     }
 })
 
 type Snapshot = {
-    duration: number
     icon: any
     setState: any
     executeOnStart: () => void
@@ -50,6 +49,21 @@ type Timebin = {
     icon: any
 }
 
+
+const Snapshot = ({icon, deleteSnapshot, setState, index}: any) => {
+    const classes = useStyles()
+
+    return (
+        <div className={classes.snapshot}>
+            <div className={classes.closeSnapshot} onClick={(event) => {
+                event.preventDefault()
+                deleteSnapshot(index)
+            }}>x
+            </div>
+            <div className={classes.snapshotIcon} onClick={setState}>{icon}</div>
+        </div>
+    )
+}
 
 export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     // so this needs to hold instances of the grid -
@@ -65,24 +79,55 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
 
     const classes = useStyles()
 
-    const [duration, setDuration] = useState<number>(1000)
+    const container = useRef()
+
+    const [duration, setDuration] = useState<number>(100)
     const [add, setAdd] = useState<boolean>(true)
     const [snapshots, setSnapshots] = useState<Snapshot[]>([])
+    const [simulationIndex, setSimulationIndex] = useState<number>(0)
 
+    const keyDown = (event: KeyboardEvent) => {
+        const ctrl = event.metaKey || event.ctrlKey
+        const key = event.key.toLowerCase()
+        debugger
+        if(event.shiftKey && key === 'f') {
+            deleteSnapshot(snapshots.length - 1)
+        }
+        else if(key==='f') {
+            addSnapshot()
+        }
+    }
+
+    const keyUp = (event: KeyboardEvent) => {
+
+    }
+
+
+
+    useEventListener('keydown', keyDown)
+    useEventListener('keyup', keyUp)
+
+    useEffect(() => {
+        console.log(`setting frame ${simulationIndex}`)
+        setSimulationIndex(0)
+
+        const timer = setInterval(() => {
+            setSimulationIndex( index => ((index + 1) % snapshots.length))
+        }, duration)
+
+        return () => {clearInterval(timer)}
+    }, [duration, snapshots])
 
     const addSnapshot = () => {
         setSnapshots((oldSnapshots: any) => {
             const newSnapshot = {duration, icon, setState, executeOnStart}
             const newSnapshots = oldSnapshots.slice()
-            console.log(newSnapshots)
             newSnapshots.push(newSnapshot)
             return newSnapshots
         })
     }
 
-    const totalDuration = snapshots.reduce((total: number, snapshot: Snapshot) => {
-        return total + snapshot.duration
-    }, 0)
+    const totalDuration = snapshots.length * duration
 
     const deleteSnapshot = (index: number) => {
         setSnapshots(oldSnapshots => {
@@ -101,39 +146,39 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
         // setTimeouts
         let remainingDuration = totalDuration
         for (let i = snapshots.length - 1; i > -1; i--) {
-            const {duration, executeOnStart} = snapshots[i]
+            const {executeOnStart} = snapshots[i]
             remainingDuration -= duration
             setTimeout(executeOnStart, remainingDuration)
         }
     }
 
     return (
-        <Grid container style={{width: '100%', height: '100%', border: '2px solid'}}>
-            {/*{add &&*/}
-            {/*<Grid item>*/}
-                {/*<TextField type="number" value={duration}*/}
-                           {/*onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDuration(parseInt(event.target.value))}/>*/}
-                {/*<Button onClick={addSnapshot}>(ms) Add</Button>*/}
-            {/*</Grid>*/}
-            {/*}*/}
-            <Grid item>
-                <Grid container direction="column">
-                    {snapshots.map((snapshot: Snapshot, index: number) => {
-                        const {duration, setState} = snapshot
-                        return (
-                            <Grid item xs={2}>
+        <Grid container justify="center" style={{height: '100%', width: '100%',}}>
 
-                                <div style={{height:'100%', width: '100%'}} onClick={setState}>{snapshot.icon}</div>
-                            </Grid>
-                        )
-                    })}
-                    <Grid xs={1} item onClick={addSnapshot}>
-                        <AddIcon/>
-                    </Grid>
+            <div>
+            <TextField type="number" value={duration}
+                       onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDuration(parseInt(event.target.value))}/>
+                       ms
+            </div>
 
-                </Grid>
-            </Grid>
-            {/*<Button variant="outlined" color="primary" onClick={execute}>Run animation</Button>*/}
+
+            <div className={`${classes.snapshot}`} onClick={addSnapshot}>
+                {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshot}>
+                    {snapshots[simulationIndex].icon}
+                </div>}
+            </div>
+
+            <div style={{}} className={classes.snapshots}>
+                {snapshots.map((snapshot: Snapshot, index: number) => {
+                    const {setState, icon} = snapshot
+                    return (
+                        <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>
+                    )
+                })}
+                <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+
+            </div>
+            <Button variant="outlined" color="primary" onClick={execute}>Run animation</Button>
         </Grid>
     )
 

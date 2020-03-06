@@ -127,10 +127,8 @@ export const LandingPage = () => {
     const [currentImage, setCurrentImage] = useState<number[]>([])
     const [dragging, setDragging] = useState<boolean>()
     const [showShortcuts, setShowShortcuts] = useState<boolean>(false)
-    // so when I start dragging I want to have a snapshot of the cells so my undo isn't just a series of individual cells but the whole stroke
-    // So when the drag starts I need an event - when does the drag start?
-    // As soon as it leaves the first cell clicked with the mouse still down
-    // Then when someone undoes it I need to add a redo that reflects the current state (a callback that can setTheCells)
+    const [colorDock, setColorDock] = useState<string[]>()
+    const [colorDockIndex, setColorDockIndex] = useState<number>()
 
     const keyDown = (event: KeyboardEvent) => {
         console.log(`${event.ctrlKey} ${event.key}`)
@@ -149,12 +147,14 @@ export const LandingPage = () => {
             undo()
         } else if (event.shiftKey) {
             //grab object mode
-        } else if (key === 'm') {
+        } else if (key === 'q') {
             setTool('BRUSH')
-        } else if (key === 'b') {
+        } else if (key === 'a') {
             setTool('BUCKET')
         } else if (key === 'e') {
             setTool('EYEDROP')
+        } else if (key === 'Enter'){
+            submitGridRequest(cells)
         }
     }
 
@@ -210,7 +210,6 @@ export const LandingPage = () => {
         setCells(oldCells => {
             const newCells = oldCells.slice();
             newCells[index] = color
-            submitGridRequest(newCells)
             return newCells
         })
     }
@@ -319,7 +318,7 @@ export const LandingPage = () => {
     return (
         <Grid container alignItems="stretch" style={{height: '100%'}}>
             {sideOpen &&
-            <Grid item xs={3}>
+            <Grid item xs={2} style={{border: '2px solid blue'}}>
                 <Grid container>
                     <Grid item xs={9}>
                         <Grid container direction="row">
@@ -329,10 +328,10 @@ export const LandingPage = () => {
                             <Grid item>
                                 <Grid container direction="column">
                                     <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
-                                            onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'b'}
+                                            onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'a'}
                                     </Button>
                                     <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
-                                            onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'm'} </Button>
+                                            onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'q'} </Button>
                                     <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
                                             onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}</Button>
                                 </Grid>
@@ -356,24 +355,28 @@ export const LandingPage = () => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={3}>
-                        <Timebin setState={() => {
-                            setCells(cells.slice())
-                        }} loop={loop} executeOnStart={() => {
-                            submitGridRequest(cells.slice())
-                        }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
 
-                    </Grid>
                 </Grid>
             </Grid>
             }
-            <Grid alignItems="stretch" item xs={9}>
+            <Grid alignItems="stretch" item xs={8}>
                     <Paper style={{height: '100%'}} className={classes.mainPanel} onMouseDown={() => { setMouseDown(true) }} onMouseUp={() => setMouseDown(false)}
                            onMouseLeave={() => setMouseDown(false)}>
                         <PixelGrid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
                               onCellDown={getOnCellDown()} onCellClick={getOnClick()}
                               mouseDown={mouseDown}/>
                     </Paper>
+            </Grid>
+            <Grid item xs={2} style={{height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>
+                <Grid container direction="column" style={{height: '100%'}}>
+                    <Grid item xs={12}>
+                            <Timebin setState={() => {
+                                setCells(cells.slice())
+                            }} loop={loop} executeOnStart={() => {
+                                submitGridRequest(cells.slice())
+                            }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     )
