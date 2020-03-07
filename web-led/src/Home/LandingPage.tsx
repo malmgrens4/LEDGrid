@@ -32,11 +32,10 @@ const useStyles = makeStyles({
     },
     mainPanel: {
         display: 'flex',
-        flex: '3 0 0',
         flexFlow: 'column',
-        alignItems: 'center',
     },
-    gridContainer: {},
+    gridContainer: {
+    },
     tools: {
         display: 'flex',
         flexFlow: 'column'
@@ -262,8 +261,12 @@ export const LandingPage = () => {
     }
 
     const getOnCellDown = () => {
-        return () => {
-            if (tool === 'BRUSH' || tool === 'BUCKET') {
+        return (index: number) => {
+            if (tool === 'BRUSH') {
+                setCellColor(index)
+                pushCellHistory()
+            }
+            else if (tool === 'BUCKET') {
                 pushCellHistory()
             }
         }
@@ -361,12 +364,14 @@ export const LandingPage = () => {
                 </Paper>
             </Grid>
             }
-            <Grid alignItems="stretch" item xs={8}>
+            <Grid alignItems="center" item xs={8}>
                     <Paper style={{height: '100%'}} className={classes.mainPanel} onMouseDown={() => { setMouseDown(true) }} onMouseUp={() => setMouseDown(false)}
                            onMouseLeave={() => setMouseDown(false)}>
-                        <PixelGrid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
-                              onCellDown={getOnCellDown()} onCellClick={getOnClick()}
-                              mouseDown={mouseDown}/>
+                        <div style={{flex:'1', padding: '32px'}}>
+                            <PixelGrid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
+                                  onCellDown={getOnCellDown()} onCellClick={getOnClick()}
+                                  mouseDown={mouseDown}/>
+                        </div>
                     </Paper>
             </Grid>
             <Grid item xs={2} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>

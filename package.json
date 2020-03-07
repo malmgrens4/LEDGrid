@@ -4,6 +4,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.9.0",
     "@types/react-color": "^3.0.1",
-    "react-color": "^2.18.0"
+    "react-color": "^2.18.0",
+    "react-virtualized-auto-sizer": "^1.0.2"
   }
 }

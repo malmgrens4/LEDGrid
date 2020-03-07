@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {makeStyles} from '@material-ui/styles'
+import { useEventListener } from "../EventListenerHook/eventListener";
+import Autosizer from 'react-virtualized-auto-sizer'
 
 const useStyles = makeStyles({
     grid: {
-        height: '50vw',
-        width: '50vw',
+        border: '1px solid pink',
         display: 'flex',
         flexFlow: 'column',
     },
@@ -39,6 +40,11 @@ type PixelGrid = {
 
 export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp, onCellDown}: PixelGrid) => {
     const classes = useStyles()
+    const resize = (event: any) => {
+        console.log(event)
+    }
+
+    useEventListener('resize', resize)
 
     // Go through each col in a row
     const getRow = (rowIndex: number) => {
@@ -74,8 +80,12 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
     }
 
     return (
-        <div className={classes.grid}>
-            {getGrid()}
-        </div>
+        <Autosizer style={{height: '100%', width: '100%'}}>
+            {({height, width}) => (
+                <div className={classes.grid} style={{height: Math.min(height, width), width: Math.min(height, width)}}>
+                    {getGrid()}
+                </div>
+            )}
+        </Autosizer>
     )
 }
