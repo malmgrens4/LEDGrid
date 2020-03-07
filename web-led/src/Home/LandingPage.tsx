@@ -33,8 +33,8 @@ const useStyles = makeStyles({
     mainPanel: {
         display: 'flex',
         flex: '3 0 0',
-        padding: '8px',
-        flexFlow: 'column'
+        flexFlow: 'column',
+        alignItems: 'center',
     },
     gridContainer: {},
     tools: {
@@ -49,7 +49,8 @@ const initialCells: string[] = []
 
 for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-        initialCells.push('#000000')
+        const color = ((i+j)%2) ? '#4C4C4C' : '#555555'
+        initialCells.push(color)
     }
 }
 
@@ -318,15 +319,16 @@ export const LandingPage = () => {
     return (
         <Grid container alignItems="stretch" style={{height: '100%'}}>
             {sideOpen &&
-            <Grid item xs={2} style={{border: '2px solid blue'}}>
-                <Grid container>
+            <Grid item xs={2}>
+                <Paper style={{height: '100%'}}>
+                <Grid container justify="center">
                     <Grid item xs={9}>
                         <Grid container direction="row">
                             <SketchPicker color={color} onChange={(newColor: any) => {
                                 setColor(newColor.hex)
                             }}/>
                             <Grid item>
-                                <Grid container direction="column">
+                                <Grid container alignItems="stretch" direction="column">
                                     <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
                                             onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'a'}
                                     </Button>
@@ -339,24 +341,24 @@ export const LandingPage = () => {
                         </Grid>
                         <Grid container>
                             <Grid item>
-                                <Button variant="outlined" color="primary" onClick={() => submitGridRequest(cells)}>
+                                <Button color="primary" variant="contained" onClick={() => submitGridRequest(cells)}>
                                     Set LEDs
                                 </Button>
                                 </Grid>
                             <Grid item>
-                                <Button variant="outlined" color="primary" onClick={clearCells}>
+                                <Button color="primary" variant="contained" onClick={clearCells}>
                                     Clear LEDs
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <Button variant="outlined" color="primary"
+                                <Button color="primary" variant="contained"
                                     onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}
                                 </Button>
                             </Grid>
                         </Grid>
                     </Grid>
-
                 </Grid>
+                </Paper>
             </Grid>
             }
             <Grid alignItems="stretch" item xs={8}>
@@ -367,16 +369,20 @@ export const LandingPage = () => {
                               mouseDown={mouseDown}/>
                     </Paper>
             </Grid>
-            <Grid item xs={2} style={{height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>
-                <Grid container direction="column" style={{height: '100%'}}>
-                    <Grid item xs={12}>
-                            <Timebin setState={() => {
-                                setCells(cells.slice())
-                            }} loop={loop} executeOnStart={() => {
-                                submitGridRequest(cells.slice())
-                            }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
+            <Grid item xs={2} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>
+                <Paper style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>
+
+                    <Grid container direction="column" style={{height: '100%'}}>
+                        <Grid item xs={12} style={{height: '100%'}}>
+                                <Timebin setState={() => {
+                                    setCells(cells.slice())
+                                }} loop={loop} executeOnStart={() => {
+                                    submitGridRequest(cells.slice())
+                                }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Paper>
+
             </Grid>
         </Grid>
     )

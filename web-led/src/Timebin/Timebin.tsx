@@ -8,14 +8,13 @@ import { useEventListener } from "../EventListenerHook/eventListener";
 
 const useStyles = makeStyles({
     snapshots: {
-        border: '2px solid pink',
         display: 'flex',
+        minHeight: '100%',
         flexFlow: 'column',
-        height: '100%',
         position: 'relative',
     },
     snapshot: {
-        border: '2px solid',
+        border: '1px solid',
         display: 'flex',
         height: '8vw',
         width: '8vw'
@@ -66,17 +65,6 @@ const Snapshot = ({icon, deleteSnapshot, setState, index}: any) => {
 }
 
 export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
-    // so this needs to hold instances of the grid -
-    // it needs to be snapshots that when played will update the led grid
-    // when play is hit it runs through them with the provided time interval
-    // so it should be time and snapshot
-    // the snapshot will be a reference to the cells array
-    // so each timer runs through then you give it a callback that executes at the beginning of each time stamp
-    // How can I allow the user to select and edit a given frame?
-    // A time will be part of the component - you select add and it adds a new frame with the selected amount of time
-    // You can delete a component and it will remove it shifting the next item in its place
-    // or there can be an edit state where you update that index - instead of add it becomes update
-
     const classes = useStyles()
 
     const container = useRef()
@@ -89,7 +77,6 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     const keyDown = (event: KeyboardEvent) => {
         const ctrl = event.metaKey || event.ctrlKey
         const key = event.key.toLowerCase()
-        debugger
         if(event.shiftKey && key === 'f') {
             deleteSnapshot(snapshots.length - 1)
         }
@@ -153,7 +140,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     }
 
     return (
-        <Grid container justify="center" style={{height: '100%', width: '100%',}}>
+        <Grid container justify="center">
 
             <div>
             <TextField type="number" value={duration}
@@ -166,7 +153,10 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                 {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshot}>
                     {snapshots[simulationIndex].icon}
                 </div>}
+
             </div>
+            <Button variant="contained" color="primary" onClick={execute}>Run animation</Button>
+
 
             <div style={{}} className={classes.snapshots}>
                 {snapshots.map((snapshot: Snapshot, index: number) => {
@@ -176,9 +166,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                     )
                 })}
                 <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
-
             </div>
-            <Button variant="outlined" color="primary" onClick={execute}>Run animation</Button>
         </Grid>
     )
 

@@ -3,11 +3,10 @@ import {makeStyles} from '@material-ui/styles'
 
 const useStyles = makeStyles({
     grid: {
-        height: '100%',
-        width: '100%',
+        height: '50vw',
+        width: '50vw',
         display: 'flex',
         flexFlow: 'column',
-        flex: '1 1 0'
     },
     row: {
         display: 'flex',
@@ -19,11 +18,11 @@ const useStyles = makeStyles({
         alignContent: 'center',
         flex: '1 1 0',
         userSelect: 'none',
+        border: '1px solid'
     },
     cellContent: {
         display: 'flex',
         alignSelf: 'center',
-        border: '2px solid black'
     }
 })
 
@@ -59,7 +58,7 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
                                onMouseEnter={() => {
                                    onCellEnter(cellIndex)
                                }}>
-                <div className={classes.cellContent}>{cellIndex}</div>
+                <div className={classes.cellContent}></div>
             </div>)
         }
         return rowCells

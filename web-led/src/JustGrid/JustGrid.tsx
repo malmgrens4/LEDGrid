@@ -24,7 +24,6 @@ const useStyles = makeStyles({
     cellContent: {
         display: 'flex',
         alignSelf: 'center',
-        border: '2px solid black'
     }
 })
 
