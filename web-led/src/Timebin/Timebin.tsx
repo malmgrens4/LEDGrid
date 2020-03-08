@@ -234,7 +234,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
             <Grid item style={{height: '50vh', overflowY: 'scroll'}}>
                 <Card>
                     <CardContent>
-                <div style={{overflowY: 'scroll'}} className={classes.snapshots}>
+                <div className={classes.snapshots}>
                     {snapshots.map((snapshot: Snapshot, index: number) => {
                         const {setState, icon} = snapshot
                         return (

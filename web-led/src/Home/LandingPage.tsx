@@ -219,6 +219,7 @@ export const LandingPage = () => {
     }
 
 
+
     const bucketPaint = (index: number) => {
         getNeighborChain(cells, index).map((cellIndex: number) => {
             setCellColor(cellIndex)
