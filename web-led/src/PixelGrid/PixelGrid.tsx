@@ -80,7 +80,7 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
     }
 
     return (
-        <Autosizer style={{height: '100%', width: '100%'}}>
+        <Autosizer>
             {({height, width}) => (
                 <div className={classes.grid} style={{height: Math.min(height, width), width: Math.min(height, width)}}>
                     {getGrid()}

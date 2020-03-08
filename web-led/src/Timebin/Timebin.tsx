@@ -4,7 +4,13 @@ import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
 import AddIcon from '@material-ui/icons/Add';
 import Grid from '@material-ui/core/Grid';
+import Slider from '@material-ui/core/Slider';
+import Input from '@material-ui/core/Input';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 import { useEventListener } from "../EventListenerHook/eventListener";
+import CardActions from "@material-ui/core/CardActions";
+import InputLabel from '@material-ui/core/InputLabel';
 
 const useStyles = makeStyles({
     snapshots: {
@@ -17,11 +23,17 @@ const useStyles = makeStyles({
         border: '1px solid',
         display: 'flex',
         height: '8vw',
-        width: '8vw'
+        width: '8vw',
+        position: 'relative',
     },
     closeSnapshot: {
         cursor: 'pointer',
         position: 'absolute'
+    },
+    snapshotIndex: {
+      cursor: 'pointer',
+      position: 'absolute',
+      right: '0',
     },
     snapshotIcon: {
         display: 'flex',
@@ -32,6 +44,12 @@ const useStyles = makeStyles({
         height: '8vw',
         width: '8vw',
         justifyContent: 'center'
+    },
+    snapshotDisplay: {
+        height: '10vw',
+        width: '10vw',
+        display: 'flex',
+        border: '1px solid',
     }
 })
 
@@ -59,6 +77,7 @@ const Snapshot = ({icon, deleteSnapshot, setState, index}: any) => {
                 deleteSnapshot(index)
             }}>x
             </div>
+            <div className={classes.snapshotIndex}>{index}</div>
             <div className={classes.snapshotIcon} onClick={setState}>{icon}</div>
         </div>
     )
@@ -68,8 +87,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     const classes = useStyles()
 
     const container = useRef()
-
-    const [duration, setDuration] = useState<number>(100)
+    const [fps, setFps] = useState<number>(5)
     const [add, setAdd] = useState<boolean>(true)
     const [snapshots, setSnapshots] = useState<Snapshot[]>([])
     const [simulationIndex, setSimulationIndex] = useState<number>(0)
@@ -86,10 +104,10 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     }
 
     const keyUp = (event: KeyboardEvent) => {
-
+        return
     }
 
-
+    const duration = (1/fps) * 1000
 
     useEventListener('keydown', keyDown)
     useEventListener('keyup', keyUp)
@@ -107,7 +125,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
 
     const addSnapshot = () => {
         setSnapshots((oldSnapshots: any) => {
-            const newSnapshot = {duration, icon, setState, executeOnStart}
+            const newSnapshot = {icon, setState, executeOnStart}
             const newSnapshots = oldSnapshots.slice()
             newSnapshots.push(newSnapshot)
             return newSnapshots
@@ -139,34 +157,100 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
         }
     }
 
+
+    const handleSliderChange = (event: any, newValue: any) => {
+        setFps(newValue);
+    };
+
+    const handleInputChange = (event: any) => {
+        setFps(event.target.value === '' ? 0.1 : Number(event.target.value));
+    };
+
+    const handleBlur = () => {
+        if (fps < 0.1) {
+            setFps(0.1);
+        } else if (fps > 15) {
+            setFps(15);
+        }
+    };
+
     return (
-        <Grid container justify="center">
+        <Grid container justify="center" spacing={4}>
+            <Grid item>
+                <Card style={{padding: '8px'}}>
+            <Grid container justify="center">
+                <Grid item>
+                    <CardContent>
+                        <div className={`${classes.snapshotDisplay}`}>
+                            {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
+                                {snapshots[simulationIndex].icon}
+                            </div>}
+                        </div>
+                    </CardContent>
+                </Grid>
+                <Grid item style={{width: '100%'}}>
+                    <CardActions>
+                    <Grid container direction="column">
+                        <Grid item>
+                            <Grid container spacing={2}>
+                                <Grid item xs={8}>
+                                    <InputLabel>FPS</InputLabel>
+                                    <Slider
+                                        value={typeof fps === 'number' ? fps : 0.1}
+                                        onChange={handleSliderChange}
+                                        step={.1}
+                                        min={.1}
+                                        max={15}
+                                        aria-labelledby="input-slider"
+                                    />
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Input
+                                        value={fps}
+                                        margin="dense"
+                                        onBlur={handleBlur}
+                                        onChange={handleInputChange}
+                                        inputProps={{
+                                            step: .1,
+                                            min: .1,
+                                            max: 15,
+                                            type: 'number',
+                                            'aria-labelledby': 'input-slider',
+                                        }}
+                                    />
+                                </Grid>
+                            </Grid>
+                            <Grid item>
+                                <Button variant="contained" color="primary" onClick={execute}>Run animation</Button>
+                            </Grid>
+                        </Grid>
+                </Grid>
+                    </CardActions>
 
-            <div>
-            <TextField type="number" value={duration}
-                       onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDuration(parseInt(event.target.value))}/>
-                       ms
-            </div>
+                </Grid>
+            </Grid>
+                </Card>
 
 
-            <div className={`${classes.snapshot}`} onClick={addSnapshot}>
-                {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshot}>
-                    {snapshots[simulationIndex].icon}
-                </div>}
-
-            </div>
-            <Button variant="contained" color="primary" onClick={execute}>Run animation</Button>
 
 
-            <div style={{}} className={classes.snapshots}>
-                {snapshots.map((snapshot: Snapshot, index: number) => {
-                    const {setState, icon} = snapshot
-                    return (
-                        <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>
-                    )
-                })}
-                <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
-            </div>
+            </Grid>
+
+            <Grid item style={{height: '50vh', overflowY: 'scroll'}}>
+                <Card>
+                    <CardContent>
+                <div style={{overflowY: 'scroll'}} className={classes.snapshots}>
+                    {snapshots.map((snapshot: Snapshot, index: number) => {
+                        const {setState, icon} = snapshot
+                        return (
+                            <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>
+                        )
+                    })}
+                    <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+                </div>
+                    </CardContent>
+                </Card>
+            </Grid>
         </Grid>
     )
 

@@ -323,7 +323,7 @@ export const LandingPage = () => {
         <Grid container alignItems="stretch" style={{height: '100%'}}>
             {sideOpen &&
             <Grid item xs={2}>
-                <Paper style={{height: '100%'}}>
+                <Paper square style={{height: '100%'}}>
                 <Grid container justify="center">
                     <Grid item xs={9}>
                         <Grid container direction="row">
@@ -365,7 +365,7 @@ export const LandingPage = () => {
             </Grid>
             }
             <Grid alignItems="center" item xs={8}>
-                    <Paper style={{height: '100%'}} className={classes.mainPanel} onMouseDown={() => { setMouseDown(true) }} onMouseUp={() => setMouseDown(false)}
+                    <Paper square style={{height: '100%'}} className={classes.mainPanel} onMouseDown={() => { setMouseDown(true) }} onMouseUp={() => setMouseDown(false)}
                            onMouseLeave={() => setMouseDown(false)}>
                         <div style={{flex:'1', padding: '32px'}}>
                             <PixelGrid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
@@ -374,11 +374,11 @@ export const LandingPage = () => {
                         </div>
                     </Paper>
             </Grid>
-            <Grid item xs={2} style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>
-                <Paper style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden'}}>
+            <Grid item xs={2} style={{ height: '100%'}}>
+                <Paper square style={{ height: '100%'}}>
 
                     <Grid container direction="column" style={{height: '100%'}}>
-                        <Grid item xs={12} style={{height: '100%'}}>
+                        <Grid item xs={12} style={{height: '100%', padding: '16px'}}>
                                 <Timebin setState={() => {
                                     setCells(cells.slice())
                                 }} loop={loop} executeOnStart={() => {
