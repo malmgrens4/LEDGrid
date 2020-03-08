@@ -327,33 +327,47 @@ export const LandingPage = () => {
                 <Grid container justify="center">
                     <Grid item xs={9}>
                         <Grid container direction="row">
-                            <SketchPicker color={color} onChange={(newColor: any) => {
-                                setColor(newColor.hex)
-                            }}/>
-                            <Grid item>
-                                <Grid container alignItems="stretch" direction="column">
-                                    <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
-                                            onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'a'}
-                                    </Button>
-                                    <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
-                                            onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'q'} </Button>
-                                    <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
-                                            onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}</Button>
-                                </Grid>
+
+                                <SketchPicker color={color} onChange={(newColor: any) => {
+                                    setColor(newColor.hex)
+                                }}/>
+                            <Grid item xs={12} style={{padding: '16px 0px'}}>
+                                    <Grid container
+                                          justify="space-between"
+                                          alignItems="center"
+                                          spacing={2}>
+
+                                        <Grid item xs={6}>
+                                            <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
+                                                    onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'a'}
+                                            </Button>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
+                                                    onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'q'}
+                                            </Button>
+                                            </Grid>
+                                        <Grid item xs={6}>
+                                        <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
+                                                onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}
+                                        </Button>
+                                        </Grid>
+
+                                    </Grid>
                             </Grid>
                         </Grid>
-                        <Grid container>
-                            <Grid item>
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
                                 <Button color="primary" variant="contained" onClick={() => submitGridRequest(cells)}>
                                     Set LEDs
                                 </Button>
                                 </Grid>
-                            <Grid item>
-                                <Button color="primary" variant="contained" onClick={clearCells}>
+                            <Grid item xs={6}>
+                                <Button color="secondary" variant="contained" onClick={clearCells}>
                                     Clear LEDs
                                 </Button>
                             </Grid>
-                            <Grid item>
+                            <Grid item xs={6}>
                                 <Button color="primary" variant="contained"
                                     onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}
                                 </Button>
@@ -374,7 +388,7 @@ export const LandingPage = () => {
                         </div>
                     </Paper>
             </Grid>
-            <Grid item xs={2} style={{ height: '100%'}}>
+            <Grid item xs={2}>
                 <Paper square style={{ height: '100%'}}>
 
                     <Grid container direction="column" style={{height: '100%'}}>

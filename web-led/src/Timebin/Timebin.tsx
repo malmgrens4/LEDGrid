@@ -7,6 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import Slider from '@material-ui/core/Slider';
 import Input from '@material-ui/core/Input';
 import Card from '@material-ui/core/Card';
+import Paper from '@material-ui/core/Paper';
 import CardContent from '@material-ui/core/CardContent';
 import { useEventListener } from "../EventListenerHook/eventListener";
 import CardActions from "@material-ui/core/CardActions";
@@ -27,10 +28,12 @@ const useStyles = makeStyles({
         position: 'relative',
     },
     closeSnapshot: {
+        padding: '2px',
         cursor: 'pointer',
         position: 'absolute'
     },
     snapshotIndex: {
+      padding: '2px',
       cursor: 'pointer',
       position: 'absolute',
       right: '0',
@@ -177,19 +180,16 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
     return (
         <Grid container justify="center" spacing={4}>
             <Grid item>
-                <Card style={{padding: '8px'}}>
+                <Paper style={{padding: '8px'}}>
             <Grid container justify="center">
                 <Grid item>
-                    <CardContent>
                         <div className={`${classes.snapshotDisplay}`}>
                             {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
                                 {snapshots[simulationIndex].icon}
                             </div>}
                         </div>
-                    </CardContent>
                 </Grid>
                 <Grid item style={{width: '100%'}}>
-                    <CardActions>
                     <Grid container direction="column">
                         <Grid item>
                             <Grid container spacing={2}>
@@ -225,11 +225,10 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                             </Grid>
                         </Grid>
                 </Grid>
-                    </CardActions>
 
                 </Grid>
             </Grid>
-                </Card>
+                </Paper>
 
 
 
