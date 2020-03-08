@@ -181,7 +181,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
         <Grid container justify="center" spacing={4}>
             <Grid item>
                 <Paper style={{padding: '8px'}}>
-            <Grid container justify="center">
+            <Grid container justify="center" spacing={2}>
                 <Grid item>
                         <div className={`${classes.snapshotDisplay}`}>
                             {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
@@ -189,10 +189,8 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                             </div>}
                         </div>
                 </Grid>
-                <Grid item style={{width: '100%'}}>
-                    <Grid container direction="column">
-                        <Grid item>
-                            <Grid container spacing={2}>
+                <Grid item style={{width: '100%', padding: '8px'}}>
+                            <Grid container justify="center" spacing={3}>
                                 <Grid item xs={8}>
                                     <InputLabel>FPS</InputLabel>
                                     <Slider
@@ -221,10 +219,8 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                                 </Grid>
                             </Grid>
                             <Grid item>
-                                <Button variant="contained" color="primary" onClick={execute}>Run animation</Button>
+                                <Button style={{width:'100%'}} variant="contained" color="primary" onClick={execute}>Run animation</Button>
                             </Grid>
-                        </Grid>
-                </Grid>
 
                 </Grid>
             </Grid>

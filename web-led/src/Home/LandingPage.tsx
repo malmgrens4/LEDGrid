@@ -368,9 +368,9 @@ export const LandingPage = () => {
                                 </Button>
                             </Grid>
                             <Grid item xs={6}>
-                                <Button color="primary" variant="contained"
-                                    onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}
-                                </Button>
+                                {/*<Button color="primary" variant="contained"*/}
+                                {/*    onClick={() => setLoop(!loop)}>Loop {loop ? 'on' : 'off'}*/}
+                                {/*</Button>*/}
                             </Grid>
                         </Grid>
                     </Grid>
