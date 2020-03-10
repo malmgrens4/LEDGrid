@@ -333,8 +333,6 @@ export const LandingPage = () => {
                 <Grid container justify="center">
                     <Grid item xs={9}>
                         <Grid container direction="row">
-                            {gridUrl}
-                            {streamUrl}
                                 <SketchPicker color={color} onChange={(newColor: any) => {
                                     setColor(newColor.hex)
                                 }}/>
