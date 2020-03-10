@@ -11,6 +11,7 @@ import ColorizeIcon from '@material-ui/icons/Colorize';
 import {Timebin} from '../Timebin/Timebin'
 import {useEventListener} from "../EventListenerHook/eventListener";
 import {JustGrid} from "../JustGrid/JustGrid";
+import { config } from '../config'
 
 const useStyles = makeStyles({
     mainPage: {
@@ -48,17 +49,11 @@ const initialCells: string[] = []
 
 for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-        const color = ((i+j)%2) ? '#4C4C4C' : '#555555'
+        const color = ((i+j)%2) ? '#4C4C4C' : '#4C4C4C'
         initialCells.push(color)
     }
 }
 
-const url = 'http://72.217.68.14:25566/colors'
-
-const submitGridRequest = (curCells: string[]) => {
-    const params = curCells.map(cell => cell.substring(1)).join(',')
-    fetch(`${url}/${params}`)
-}
 
 const getNeighborChain = (cells: string[], index: number) => {
     // go through each neighbor, if it's the same color push it onto the stack
@@ -129,6 +124,13 @@ export const LandingPage = () => {
     const [showShortcuts, setShowShortcuts] = useState<boolean>(false)
     const [colorDock, setColorDock] = useState<string[]>()
     const [colorDockIndex, setColorDockIndex] = useState<number>()
+    const [gridUrl, setGridUrl] = useState<string>(config.serverIp)
+    const [streamUrl, setStreamUrl] = useState<string>(config.serverIp)
+
+    const submitGridRequest = (curCells: string[]) => {
+        const params = curCells.map(cell => cell.substring(1)).join(',')
+        fetch(`http://${gridUrl}:${config.gridPort}/colors/${params}`)
+    }
 
     const keyDown = (event: KeyboardEvent) => {
         console.log(`${event.ctrlKey} ${event.key}`)
@@ -143,8 +145,12 @@ export const LandingPage = () => {
         if ((ctrl && event.shiftKey && key === 'z') || (ctrl && key === 'y')) {
             redo()
         } else if (ctrl && key === 'z') {
-            console.log('undo')
             undo()
+        } else if (key === 'i'){
+            const newGridUrl = gridUrl === config.serverIp ? config.localGridAddress : config.serverIp
+            const newStreamUrl = streamUrl === config.serverIp ? config.localStreamAddress : config.serverIp
+            setGridUrl(newGridUrl)
+            setStreamUrl(newStreamUrl)
         } else if (event.shiftKey) {
             //grab object mode
         } else if (key === 'q') {
@@ -185,7 +191,6 @@ export const LandingPage = () => {
                 return newUndoStack
             })
         }
-
     }
 
     const redo = () => {
@@ -328,7 +333,8 @@ export const LandingPage = () => {
                 <Grid container justify="center">
                     <Grid item xs={9}>
                         <Grid container direction="row">
-
+                            {gridUrl}
+                            {streamUrl}
                                 <SketchPicker color={color} onChange={(newColor: any) => {
                                     setColor(newColor.hex)
                                 }}/>
@@ -355,6 +361,13 @@ export const LandingPage = () => {
                                         </Grid>
 
                                     </Grid>
+                            </Grid>
+                            <Grid item>
+                                <div style={{border: '2px solid'}}>
+                                    <video height="250" width="250" key={streamUrl} controls autoPlay>
+                                        <source src={`http://${streamUrl}:${config.streamPort}/stream`} type="video/ogg"/>
+                                    </video>
+                                </div>
                             </Grid>
                         </Grid>
                         <Grid container spacing={2}>
