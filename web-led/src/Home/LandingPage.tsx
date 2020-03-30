@@ -360,13 +360,13 @@ export const LandingPage = () => {
 
                                     </Grid>
                             </Grid>
-                            <Grid item>
-                                <div style={{border: '2px solid'}}>
-                                    <video height="250" width="250" key={streamUrl} controls autoPlay>
-                                        <source src={`http://${streamUrl}:${config.streamPort}/stream`} type="video/ogg"/>
-                                    </video>
-                                </div>
-                            </Grid>
+                            {/*<Grid item>*/}
+                            {/*    <div style={{border: '2px solid'}}>*/}
+                            {/*        <video height="250" width="250" key={streamUrl} controls autoPlay>*/}
+                            {/*            <source src={`http://${streamUrl}:${config.streamPort}/stream`} type="video/ogg"/>*/}
+                            {/*        </video>*/}
+                            {/*    </div>*/}
+                            {/*</Grid>*/}
                         </Grid>
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
@@ -390,19 +390,31 @@ export const LandingPage = () => {
                 </Paper>
             </Grid>
             }
-            <Grid alignItems="center" item xs={8}>
-                    <Paper square style={{height: '100%'}} className={classes.mainPanel} onMouseDown={() => { setMouseDown(true) }} onMouseUp={() => setMouseDown(false)}
+            <Grid item xs={8}>
+                <Paper style={{height: '100%'}}>
+            <Grid container alignItems="center" justify='center' style={{height: '100%', width: '100%'}}>
+                    <Paper square
+                           style={{height: '100%', width: '100%'}}
+                           className={classes.mainPanel}
+                           onMouseDown={() => { setMouseDown(true) }}
+                           onMouseUp={() => setMouseDown(false)}
                            onMouseLeave={() => setMouseDown(false)}>
-                        <div style={{flex:'1', padding: '32px'}}>
-                            <PixelGrid cols={cols} rows={rows} cells={cells} onCellEnter={getOnCellEnter()} onCellUp={getOnCellUp()}
-                                  onCellDown={getOnCellDown()} onCellClick={getOnClick()}
-                                  mouseDown={mouseDown}/>
+                        <div style={{height: '100%', width:'100%', flex:'1'}}>
+                            <PixelGrid cols={cols}
+                                       rows={rows}
+                                       cells={cells}
+                                       onCellEnter={getOnCellEnter()}
+                                       onCellUp={getOnCellUp()}
+                                       onCellDown={getOnCellDown()}
+                                       onCellClick={getOnClick()}
+                                       mouseDown={mouseDown}/>
                         </div>
                     </Paper>
             </Grid>
+        </Paper>
+            </Grid>
             <Grid item xs={2}>
                 <Paper square style={{ height: '100%'}}>
-
                     <Grid container direction="column" style={{height: '100%'}}>
                         <Grid item xs={12} style={{height: '100%', padding: '16px'}}>
                                 <Timebin setState={() => {

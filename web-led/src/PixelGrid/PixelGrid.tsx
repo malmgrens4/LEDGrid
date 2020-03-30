@@ -1,13 +1,13 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {makeStyles} from '@material-ui/styles'
 import { useEventListener } from "../EventListenerHook/eventListener";
 import Autosizer from 'react-virtualized-auto-sizer'
 
 const useStyles = makeStyles({
     grid: {
-        border: '1px solid pink',
+        border: '1px solid blue',
         display: 'flex',
-        flexFlow: 'column',
+        flex: '1',
     },
     row: {
         display: 'flex',
@@ -17,7 +17,7 @@ const useStyles = makeStyles({
         display: 'flex',
         justifyContent: 'center',
         alignContent: 'center',
-        flex: '1 1 0',
+        flex: '1 0 0',
         userSelect: 'none',
         border: '1px solid'
     },
@@ -40,8 +40,20 @@ type PixelGrid = {
 
 export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp, onCellDown}: PixelGrid) => {
     const classes = useStyles()
-    const resize = (event: any) => {
-        console.log(event)
+
+    const [width, setWidth] = useState<string>('800px')
+    const [height, setHeight] = useState<string>('800px')
+
+    useEffect(() => {
+        resize()
+    }, [])
+
+    const resize = () => {
+        const gridEl = document.getElementById("grid")
+        const elWidth = gridEl!.offsetWidth
+        const elHeight = gridEl!.offsetHeight
+        setWidth(Math.min(elWidth, elHeight) + 'px')
+        setHeight(Math.min(elWidth, elHeight) + 'px')
     }
 
     useEventListener('resize', resize)
@@ -80,12 +92,10 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
     }
 
     return (
-        <Autosizer>
-            {({height, width}) => (
-                <div className={classes.grid} style={{height: Math.min(height, width), width: Math.min(height, width)}}>
+        <div id="grid" style={{height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'flex-start'}}>
+                <div style={{height, width, display: 'flex', flexFlow: 'column'}}>
                     {getGrid()}
                 </div>
-            )}
-        </Autosizer>
+        </div>
     )
 }
