@@ -49,7 +49,7 @@ const initialCells: string[] = []
 
 for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
-        const color = ((i+j)%2) ? '#4C4C4C' : '#4C4C4C'
+        const color = '#000'
         initialCells.push(color)
     }
 }
@@ -116,7 +116,6 @@ export const LandingPage = () => {
     const [tool, setTool] = useState<tools>('BRUSH')
     const [loop, setLoop] = useState<boolean>(false)
     const [cellHistory, setCellHistory] = useState<string[][]>([])
-    // The current drawing - in the case of dragging this will be the indexes being affected.
     const [undoStack, setUndoStack] = useState<any[]>([])
     const [redoStack, setRedoStack] = useState<any[]>([])
     const [currentImage, setCurrentImage] = useState<number[]>([])
@@ -398,7 +397,8 @@ export const LandingPage = () => {
                            className={classes.mainPanel}
                            onMouseDown={() => { setMouseDown(true) }}
                            onMouseUp={() => setMouseDown(false)}
-                           onMouseLeave={() => setMouseDown(false)}>
+                           onMouseLeave={() =>
+                               setMouseDown(false)}>
                         <div style={{height: '100%', width:'100%', flex:'1'}}>
                             <PixelGrid cols={cols}
                                        rows={rows}

@@ -219,31 +219,45 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                                 </Grid>
                             </Grid>
                             <Grid item>
-                                <Button style={{width:'100%'}} variant="contained" color="primary" onClick={execute}>Run animation</Button>
+                                <Grid container direction="column" spacing={3}>
+                                    <Grid item>
+                                        <Button style={{width:'100%'}} variant="contained" color="primary" onClick={execute}>Run animation</Button>
+                                    </Grid>
+                                    <Grid item>
+                                        <Grid container spacing={3}>
+                                            <Grid item xs={6}>
+                                                <div style={{display: 'flex', flex: '1', justifyContent: 'center'}}>
+                                                    <Button variant="contained" color="primary" onClick={execute}>Import</Button>
+                                                </div>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <div style={{display: 'flex', flex: '1', justifyContent: 'center'}}>
+                                                    <Button variant="contained" color="secondary" onClick={execute}><a style={{color: 'inherit', textDecoration: 'none'}} href={`data:application/octet-stream,${encodeURIComponent('')}`}>Export</a></Button>
+                                                </div>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
                             </Grid>
 
                 </Grid>
             </Grid>
                 </Paper>
-
-
-
-
             </Grid>
 
             <Grid item style={{height: '50vh', overflowY: 'scroll'}}>
                 <Card>
                     <CardContent>
-                <div
-                    className={classes.snapshots}>
-                    {snapshots.map((snapshot: Snapshot, index: number) => {
-                        const {setState, icon} = snapshot
-                        return (
-                            <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>
-                        )
-                    })}
-                    <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
-                </div>
+                    <div
+                        className={classes.snapshots}>
+                        {snapshots.map((snapshot: Snapshot, index: number) => {
+                            const {setState, icon} = snapshot
+                            return (
+                                <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>
+                            )
+                        })}
+                         <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+                     </div>
                     </CardContent>
                 </Card>
             </Grid>
