@@ -1,4 +1,4 @@
-import React, {ReactElement, useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect, DOMElement} from 'react'
 import TextField from "@material-ui/core/TextField"
 import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
@@ -12,6 +12,8 @@ import CardContent from '@material-ui/core/CardContent';
 import { useEventListener } from "../EventListenerHook/eventListener";
 import CardActions from "@material-ui/core/CardActions";
 import InputLabel from '@material-ui/core/InputLabel';
+import {useImport} from './ImportHandler'
+import {SnapshotType} from './types'
 
 const useStyles = makeStyles({
     snapshots: {
@@ -56,17 +58,16 @@ const useStyles = makeStyles({
     }
 })
 
-type Snapshot = {
-    icon: any
-    setState: any
-    executeOnStart: () => void
-}
+
 
 type Timebin = {
     executeOnStart: () => void
     setState: () => void
     loop: boolean
     icon: any
+    exportString: string
+    row: number
+    col: number
 }
 
 
@@ -86,14 +87,15 @@ const Snapshot = ({icon, deleteSnapshot, setState, index}: any) => {
     )
 }
 
-export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
+export const Timebin = ({executeOnStart, setState, loop, icon, exportString, row, col}: Timebin) => {
     const classes = useStyles()
 
-    const container = useRef()
     const [fps, setFps] = useState<number>(5)
     const [add, setAdd] = useState<boolean>(true)
-    const [snapshots, setSnapshots] = useState<Snapshot[]>([])
+    const [snapshots, setSnapshots] = useState<SnapshotType[]>([])
     const [simulationIndex, setSimulationIndex] = useState<number>(0)
+
+    const importHandler = useImport()
 
     const keyDown = (event: KeyboardEvent) => {
         const ctrl = event.metaKey || event.ctrlKey
@@ -112,6 +114,8 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
 
     const duration = (1/fps) * 1000
 
+    const exportJSONContent = row + ',' + col + '\n' + snapshots.reduce((exportString: string, snapshot: SnapshotType) =>  exportString + snapshot.exportString + '\n', '')
+
     useEventListener('keydown', keyDown)
     useEventListener('keyup', keyUp)
 
@@ -128,7 +132,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
 
     const addSnapshot = () => {
         setSnapshots((oldSnapshots: any) => {
-            const newSnapshot = {icon, setState, executeOnStart}
+            const newSnapshot = {icon, setState, executeOnStart, exportString}
             const newSnapshots = oldSnapshots.slice()
             newSnapshots.push(newSnapshot)
             return newSnapshots
@@ -162,20 +166,42 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
 
 
     const handleSliderChange = (event: any, newValue: any) => {
-        setFps(newValue);
-    };
+        setFps(newValue)
+    }
 
     const handleInputChange = (event: any) => {
-        setFps(event.target.value === '' ? 0.1 : Number(event.target.value));
-    };
+        setFps(event.target.value === '' ? 0.1 : Number(event.target.value))
+    }
 
     const handleBlur = () => {
         if (fps < 0.1) {
-            setFps(0.1);
+            setFps(0.1)
         } else if (fps > 15) {
-            setFps(15);
+            setFps(15)
         }
-    };
+    }
+
+    const handleFileUpload = (event: any) => {
+        let files = event.target.files
+        let file = files[0]
+        let reader = new FileReader()
+        reader.onload = (event: any) => {
+            const newSnapshots = importHandler(event.target.result)
+            if(!!newSnapshots) {
+                setSnapshots(newSnapshots)
+            }
+        }
+        reader.readAsText(file)
+    }
+
+    const importRef = useRef<HTMLInputElement>(null)
+
+    const forwardImport = (event: any) => {
+        if(importRef && importRef.current){
+            importRef!.current!.click()
+        }
+    }
+
 
     return (
         <Grid container justify="center" spacing={4}>
@@ -225,14 +251,17 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                                     </Grid>
                                     <Grid item>
                                         <Grid container spacing={3}>
-                                            <Grid item xs={6}>
+                                            <Grid item xs={12}>
                                                 <div style={{display: 'flex', flex: '1', justifyContent: 'center'}}>
-                                                    <Button variant="contained" color="primary" onClick={execute}>Import</Button>
+                                                    <Button variant="outlined" color="secondary" onClick={forwardImport}>Import</Button>
+                                                     <input style={{visibility: 'hidden', display: 'none'}} type="file" ref={importRef} id="import" name="import" onChange={handleFileUpload}/>
                                                 </div>
                                             </Grid>
-                                            <Grid item xs={6}>
+                                            <Grid item xs={12}>
                                                 <div style={{display: 'flex', flex: '1', justifyContent: 'center'}}>
-                                                    <Button variant="contained" color="secondary" onClick={execute}><a style={{color: 'inherit', textDecoration: 'none'}} href={`data:application/octet-stream,${encodeURIComponent('')}`}>Export</a></Button>
+                                                    <Button variant="contained" color="secondary" onClick={execute}>
+                                                        <a style={{color: 'inherit', textDecoration: 'none'}} href={`data:application/octet-stream,${encodeURIComponent(exportJSONContent)}`}>Export</a>
+                                                    </Button>
                                                 </div>
                                             </Grid>
                                         </Grid>
@@ -250,7 +279,7 @@ export const Timebin = ({executeOnStart, setState, loop, icon}: Timebin) => {
                     <CardContent>
                     <div
                         className={classes.snapshots}>
-                        {snapshots.map((snapshot: Snapshot, index: number) => {
+                        {snapshots.map((snapshot: SnapshotType, index: number) => {
                             const {setState, icon} = snapshot
                             return (
                                 <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>

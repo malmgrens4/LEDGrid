@@ -105,7 +105,13 @@ const getNeighbors = (cells: string[], index: number) => {
     return neighbors
 }
 
+export const submitGridRequest = (curCells: string[], gridUrl: string) => {
+    const params = curCells.map(cell => cell.substring(1)).join(',')
+    fetch(`http://${gridUrl}:${config.gridPort}/colors/${params}`)
+}
+
 type tools = 'BRUSH' | 'BUCKET' | 'EYEDROP'
+
 
 export const LandingPage = () => {
     const classes = useStyles()
@@ -126,10 +132,9 @@ export const LandingPage = () => {
     const [gridUrl, setGridUrl] = useState<string>(config.serverIp)
     const [streamUrl, setStreamUrl] = useState<string>(config.serverIp)
 
-    const submitGridRequest = (curCells: string[]) => {
-        const params = curCells.map(cell => cell.substring(1)).join(',')
-        fetch(`http://${gridUrl}:${config.gridPort}/colors/${params}`)
-    }
+
+
+
 
     const keyDown = (event: KeyboardEvent) => {
         console.log(`${event.ctrlKey} ${event.key}`)
@@ -159,7 +164,7 @@ export const LandingPage = () => {
         } else if (key === 'e') {
             setTool('EYEDROP')
         } else if (key === 'Enter'){
-            submitGridRequest(cells)
+            submitGridRequest(cells, gridUrl)
         }
     }
 
@@ -369,7 +374,7 @@ export const LandingPage = () => {
                         </Grid>
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
-                                <Button color="primary" variant="contained" onClick={() => submitGridRequest(cells)}>
+                                <Button color="primary" variant="contained" onClick={() => submitGridRequest(cells, gridUrl)}>
                                     Set LEDs
                                 </Button>
                                 </Grid>
@@ -417,11 +422,17 @@ export const LandingPage = () => {
                 <Paper square style={{ height: '100%'}}>
                     <Grid container direction="column" style={{height: '100%'}}>
                         <Grid item xs={12} style={{height: '100%', padding: '16px'}}>
-                                <Timebin setState={() => {
-                                    setCells(cells.slice())
-                                }} loop={loop} executeOnStart={() => {
-                                    submitGridRequest(cells.slice())
-                                }} icon={ <JustGrid cells={cells} cols={cols} rows={rows}/>}/>
+                            <Timebin setState={() => {
+                                        setCells(cells.slice())
+                                        }}
+                                     loop={loop}
+                                     executeOnStart={() => {
+                                        submitGridRequest(cells.slice(), gridUrl)}}
+                                     icon={ <JustGrid cells={cells} cols={cols} rows={rows}/> }
+                                     exportString={cells.slice().join(',')}
+                                     row={rows}
+                                     col={cols}
+                            />
                         </Grid>
                     </Grid>
                 </Paper>
