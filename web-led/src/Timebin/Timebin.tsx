@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef, RefObject} from 'react'
 import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
 import AddIcon from '@material-ui/icons/Add';
@@ -12,7 +12,6 @@ import { useEventListener } from "../EventListenerHook/eventListener";
 import InputLabel from '@material-ui/core/InputLabel';
 import {SnapshotType} from './types'
 import {ImportExport} from "../ImportExport/ImportExport";
-import usePixel from "../PixelGrid/pixel.hook";
 import {JustGrid} from "../JustGrid/JustGrid";
 import {submitGridRequest} from "../Home/LandingPage";
 
@@ -160,7 +159,12 @@ const AnimationPreview = ({snapshots, fps, setFps, cols, rows}: any) => {
         </Grid>
         </>
     )
+}
 
+const scrollToRef = (innerElRef: RefObject<any>, parentElRef: RefObject<any>) => {
+    if(innerElRef && parentElRef) {
+        parentElRef!.current!.scrollTop = innerElRef!.current!.offsetTop
+    }
 }
 
 export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
@@ -169,6 +173,8 @@ export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
     const [fps, setFps] = useState<number>(5)
     const [snapshots, setSnapshots] = useState<SnapshotType[]>([])
 
+    const addSnapRef = useRef<HTMLDivElement>(null)
+    const snapContainerRef = useRef<HTMLDivElement>(null)
 
     const keyDown = (event: KeyboardEvent) => {
         const key = event.key.toLowerCase()
@@ -196,6 +202,7 @@ export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
             newSnapshots.push(newSnapshot)
             return newSnapshots
         })
+        scrollToRef(addSnapRef, snapContainerRef)
     }
 
     const totalDuration = snapshots.length * duration
@@ -250,7 +257,7 @@ export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
                 </Paper>
             </Grid>
 
-            <Grid item style={{height: '50vh', overflowY: 'scroll'}}>
+            <Grid item ref={snapContainerRef} style={{height: '50vh', overflowY: 'scroll'}}>
                 <Card>
                     <CardContent>
                         <div
@@ -261,7 +268,7 @@ export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
                                     <Snapshot cells={cells} deleteSnapshot={deleteSnapshot} cols={cols} rows={rows} index={index} setCells={setCells}/>
                                 )
                             })}
-                             <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+                             <div ref={addSnapRef} className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
                      </div>
                     </CardContent>
                 </Card>

@@ -15,7 +15,7 @@ const usePixel = () => {
     const [cells, setCells] = useState<string[]>(initialCells)
     const [cols, setCols] = useState<number>(initialCols)
     const [rows, setRows] = useState<number>(initialRows)
-    console.log(cells)
+
     return {cells, setCells, cols, setCols, rows, setRows}
 }
 

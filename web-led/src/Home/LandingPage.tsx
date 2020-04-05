@@ -10,8 +10,7 @@ import BrushIcon from '@material-ui/icons/Brush';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import {Timebin} from '../Timebin/Timebin'
 import {useEventListener} from "../EventListenerHook/eventListener";
-import {JustGrid} from "../JustGrid/JustGrid";
-import { config } from '../config'
+import { config } from '../config';
 import {getNeighborChain} from "../PixelGrid/GridHelpers";
 import usePixel from "../PixelGrid/pixel.hook";
 
