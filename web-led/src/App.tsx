@@ -4,6 +4,7 @@ import { LandingPage } from './Home/LandingPage'
 import { createMuiTheme } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 import ThemeProvider from "@material-ui/styles/ThemeProvider";
+import PixelHook from './PixelGrid/pixel.hook'
 
 const theme = createMuiTheme({
     palette: {
@@ -21,10 +22,9 @@ function App() {
 
   return (
       <ThemeProvider theme={theme}>
-        <div style={{width: '100%', height: '100%'}}>
-
-            <LandingPage/>
-        </div>
+            <div style={{width: '100%', height: '100%'}}>
+                <LandingPage/>
+            </div>
       </ThemeProvider>
   )
 }

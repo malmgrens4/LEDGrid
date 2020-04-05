@@ -1,5 +1,4 @@
-import React, {useState, useRef, useEffect, DOMElement} from 'react'
-import TextField from "@material-ui/core/TextField"
+import React, {useState, useEffect} from 'react'
 import Button from "@material-ui/core/Button"
 import {makeStyles} from '@material-ui/styles'
 import AddIcon from '@material-ui/icons/Add';
@@ -10,10 +9,12 @@ import Card from '@material-ui/core/Card';
 import Paper from '@material-ui/core/Paper';
 import CardContent from '@material-ui/core/CardContent';
 import { useEventListener } from "../EventListenerHook/eventListener";
-import CardActions from "@material-ui/core/CardActions";
 import InputLabel from '@material-ui/core/InputLabel';
-import {useImport} from './ImportHandler'
 import {SnapshotType} from './types'
+import {ImportExport} from "../ImportExport/ImportExport";
+import usePixel from "../PixelGrid/pixel.hook";
+import {JustGrid} from "../JustGrid/JustGrid";
+import {submitGridRequest} from "../Home/LandingPage";
 
 const useStyles = makeStyles({
     snapshots: {
@@ -61,17 +62,15 @@ const useStyles = makeStyles({
 
 
 type Timebin = {
-    executeOnStart: () => void
-    setState: () => void
+    cells: string[]
+    setCells: (cells: string[]) => void
     loop: boolean
-    icon: any
-    exportString: string
-    row: number
-    col: number
+    cols: number
+    rows: number
 }
 
 
-const Snapshot = ({icon, deleteSnapshot, setState, index}: any) => {
+const Snapshot = ({cells, cols, rows, deleteSnapshot, index, setCells}: any) => {
     const classes = useStyles()
 
     return (
@@ -82,23 +81,96 @@ const Snapshot = ({icon, deleteSnapshot, setState, index}: any) => {
             }}>x
             </div>
             <div className={classes.snapshotIndex}>{index}</div>
-            <div className={classes.snapshotIcon} onClick={setState}>{icon}</div>
+            <div className={classes.snapshotIcon} onClick={() => {setCells(cells);}}>
+                <JustGrid cells={cells} cols={cols} rows={rows}/>
+            </div>
         </div>
     )
 }
 
-export const Timebin = ({executeOnStart, setState, loop, icon, exportString, row, col}: Timebin) => {
+const AnimationPreview = ({snapshots, fps, setFps, cols, rows}: any) => {
+    const classes = useStyles()
+
+    const [simulationIndex, setSimulationIndex] = useState<number>(0)
+
+    const duration = (1/fps) * 1000
+
+    const handleBlur = () => {
+        if (fps < 0.1) {
+            setFps(0.1)
+        } else if (fps > 15) {
+            setFps(15)
+        }
+    }
+
+    const handleSliderChange = (event: any, newValue: any) => {
+        setFps(newValue)
+    }
+
+    const handleInputChange = (event: any) => {
+        setFps(event.target.value === '' ? 0.1 : Number(event.target.value))
+    }
+
+    useEffect(() => {
+        setSimulationIndex(0)
+
+        const timer = setInterval(() => {
+            setSimulationIndex( index => ((index + 1) % snapshots.length))
+        }, duration)
+
+        return () => {clearInterval(timer)}
+    }, [duration, snapshots])
+
+    return (
+        <>
+            <Grid item>
+                <div className={`${classes.snapshotDisplay}`}>
+                    {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
+                        <JustGrid cells={snapshots[simulationIndex].cells} cols={cols} rows={rows}/>
+                    </div>}
+                </div>
+            </Grid>
+            <Grid container justify="center" spacing={3}>
+            <Grid item xs={8}>
+            <InputLabel>FPS</InputLabel>
+                <Slider
+                    value={typeof fps === 'number' ? fps : 0.1}
+                    onChange={handleSliderChange}
+                    step={.1}
+                    min={.1}
+                    max={15}
+                    aria-labelledby="input-slider"
+                />
+            </Grid>
+                <Grid item xs={4}>
+                <Input
+                    value={fps}
+                    margin="dense"
+                    onBlur={handleBlur}
+                    onChange={handleInputChange}
+                    inputProps={{
+                        step: .1,
+                            min: .1,
+                            max: 15,
+                            type: 'number',
+                            'aria-labelledby': 'input-slider',
+                    }}
+                />
+        </Grid>
+        </Grid>
+        </>
+    )
+
+}
+
+export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
     const classes = useStyles()
 
     const [fps, setFps] = useState<number>(5)
-    const [add, setAdd] = useState<boolean>(true)
     const [snapshots, setSnapshots] = useState<SnapshotType[]>([])
-    const [simulationIndex, setSimulationIndex] = useState<number>(0)
 
-    const importHandler = useImport()
 
     const keyDown = (event: KeyboardEvent) => {
-        const ctrl = event.metaKey || event.ctrlKey
         const key = event.key.toLowerCase()
         if(event.shiftKey && key === 'f') {
             deleteSnapshot(snapshots.length - 1)
@@ -114,25 +186,12 @@ export const Timebin = ({executeOnStart, setState, loop, icon, exportString, row
 
     const duration = (1/fps) * 1000
 
-    const exportJSONContent = row + ',' + col + '\n' + snapshots.reduce((exportString: string, snapshot: SnapshotType) =>  exportString + snapshot.exportString + '\n', '')
-
     useEventListener('keydown', keyDown)
     useEventListener('keyup', keyUp)
 
-    useEffect(() => {
-        console.log(`setting frame ${simulationIndex}`)
-        setSimulationIndex(0)
-
-        const timer = setInterval(() => {
-            setSimulationIndex( index => ((index + 1) % snapshots.length))
-        }, duration)
-
-        return () => {clearInterval(timer)}
-    }, [duration, snapshots])
-
     const addSnapshot = () => {
         setSnapshots((oldSnapshots: any) => {
-            const newSnapshot = {icon, setState, executeOnStart, exportString}
+            const newSnapshot = {cells}
             const newSnapshots = oldSnapshots.slice()
             newSnapshots.push(newSnapshot)
             return newSnapshots
@@ -158,47 +217,9 @@ export const Timebin = ({executeOnStart, setState, loop, icon, exportString, row
         // setTimeouts
         let remainingDuration = totalDuration
         for (let i = snapshots.length - 1; i > -1; i--) {
-            const {executeOnStart} = snapshots[i]
+            const {cells} = snapshots[i]
             remainingDuration -= duration
-            setTimeout(executeOnStart, remainingDuration)
-        }
-    }
-
-
-    const handleSliderChange = (event: any, newValue: any) => {
-        setFps(newValue)
-    }
-
-    const handleInputChange = (event: any) => {
-        setFps(event.target.value === '' ? 0.1 : Number(event.target.value))
-    }
-
-    const handleBlur = () => {
-        if (fps < 0.1) {
-            setFps(0.1)
-        } else if (fps > 15) {
-            setFps(15)
-        }
-    }
-
-    const handleFileUpload = (event: any) => {
-        let files = event.target.files
-        let file = files[0]
-        let reader = new FileReader()
-        reader.onload = (event: any) => {
-            const newSnapshots = importHandler(event.target.result)
-            if(!!newSnapshots) {
-                setSnapshots(newSnapshots)
-            }
-        }
-        reader.readAsText(file)
-    }
-
-    const importRef = useRef<HTMLInputElement>(null)
-
-    const forwardImport = (event: any) => {
-        if(importRef && importRef.current){
-            importRef!.current!.click()
+            setTimeout(() => {submitGridRequest(cells)}, remainingDuration)
         }
     }
 
@@ -208,66 +229,21 @@ export const Timebin = ({executeOnStart, setState, loop, icon, exportString, row
             <Grid item>
                 <Paper style={{padding: '8px'}}>
             <Grid container justify="center" spacing={2}>
-                <Grid item>
-                        <div className={`${classes.snapshotDisplay}`}>
-                            {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
-                                {snapshots[simulationIndex].icon}
-                            </div>}
-                        </div>
-                </Grid>
+                <AnimationPreview snapshots={snapshots} fps={fps} setFps={setFps} cols={cols} rows={rows}/>
                 <Grid item style={{width: '100%', padding: '8px'}}>
-                            <Grid container justify="center" spacing={3}>
-                                <Grid item xs={8}>
-                                    <InputLabel>FPS</InputLabel>
-                                    <Slider
-                                        value={typeof fps === 'number' ? fps : 0.1}
-                                        onChange={handleSliderChange}
-                                        step={.1}
-                                        min={.1}
-                                        max={15}
-                                        aria-labelledby="input-slider"
-                                    />
+
+                        <Grid item>
+                            <Grid container direction="column" spacing={3}>
+                                <Grid item>
+                                    <Button style={{width:'100%'}} variant="contained" color="primary" onClick={execute}>Run animation</Button>
                                 </Grid>
-                                <Grid item xs={4}>
-                                    <Input
-                                        value={fps}
-                                        margin="dense"
-                                        onBlur={handleBlur}
-                                        onChange={handleInputChange}
-                                        inputProps={{
-                                            step: .1,
-                                            min: .1,
-                                            max: 15,
-                                            type: 'number',
-                                            'aria-labelledby': 'input-slider',
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid>
-                            <Grid item>
-                                <Grid container direction="column" spacing={3}>
-                                    <Grid item>
-                                        <Button style={{width:'100%'}} variant="contained" color="primary" onClick={execute}>Run animation</Button>
-                                    </Grid>
-                                    <Grid item>
-                                        <Grid container spacing={3}>
-                                            <Grid item xs={12}>
-                                                <div style={{display: 'flex', flex: '1', justifyContent: 'center'}}>
-                                                    <Button variant="outlined" color="secondary" onClick={forwardImport}>Import</Button>
-                                                     <input style={{visibility: 'hidden', display: 'none'}} type="file" ref={importRef} id="import" name="import" onChange={handleFileUpload}/>
-                                                </div>
-                                            </Grid>
-                                            <Grid item xs={12}>
-                                                <div style={{display: 'flex', flex: '1', justifyContent: 'center'}}>
-                                                    <Button variant="contained" color="secondary" onClick={execute}>
-                                                        <a style={{color: 'inherit', textDecoration: 'none'}} href={`data:application/octet-stream,${encodeURIComponent(exportJSONContent)}`}>Export</a>
-                                                    </Button>
-                                                </div>
-                                            </Grid>
-                                        </Grid>
+                                <Grid item>
+                                    <Grid container spacing={3}>
+                                        <ImportExport snapshots={snapshots} setSnapshots={setSnapshots} cols={cols} rows={rows} />
                                     </Grid>
                                 </Grid>
                             </Grid>
+                        </Grid>
 
                 </Grid>
             </Grid>
@@ -277,15 +253,15 @@ export const Timebin = ({executeOnStart, setState, loop, icon, exportString, row
             <Grid item style={{height: '50vh', overflowY: 'scroll'}}>
                 <Card>
                     <CardContent>
-                    <div
-                        className={classes.snapshots}>
-                        {snapshots.map((snapshot: SnapshotType, index: number) => {
-                            const {setState, icon} = snapshot
-                            return (
-                                <Snapshot deleteSnapshot={deleteSnapshot} icon={icon} setState={setState} index={index}/>
-                            )
-                        })}
-                         <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
+                        <div
+                            className={classes.snapshots}>
+                            {snapshots.map((snapshot: SnapshotType, index: number) => {
+                                const {cells} = snapshot
+                                return (
+                                    <Snapshot cells={cells} deleteSnapshot={deleteSnapshot} cols={cols} rows={rows} index={index} setCells={setCells}/>
+                                )
+                            })}
+                             <div className={`${classes.snapshot} ${classes.addSnapshot}`} onClick={addSnapshot}><AddIcon style={{alignSelf: 'center'}}/></div>
                      </div>
                     </CardContent>
                 </Card>

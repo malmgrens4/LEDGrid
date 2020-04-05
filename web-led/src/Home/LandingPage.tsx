@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import { PixelGrid } from '../PixelGrid/PixelGrid';
 import Grid from '@material-ui/core/Grid'
 import {SketchPicker} from 'react-color'
@@ -12,6 +12,8 @@ import {Timebin} from '../Timebin/Timebin'
 import {useEventListener} from "../EventListenerHook/eventListener";
 import {JustGrid} from "../JustGrid/JustGrid";
 import { config } from '../config'
+import {getNeighborChain} from "../PixelGrid/GridHelpers";
+import usePixel from "../PixelGrid/pixel.hook";
 
 const useStyles = makeStyles({
     mainPage: {
@@ -54,68 +56,15 @@ for (let i = 0; i < rows; i++) {
     }
 }
 
-
-const getNeighborChain = (cells: string[], index: number) => {
-    // go through each neighbor, if it's the same color push it onto the stack
-    // when it's popped off the stack add it to the list of visited then that list is returned
-    let visited: number[] = []
-    let stack: number[] = []
-    stack.push(index)
-    while (stack.length > 0) {
-        let current: number = stack.pop()!
-        if (!visited.includes(current)) {
-            visited.push(current)
-            let color: string = cells[current]
-            getNeighbors(cells, current).map((neighbor: number) => {
-                if (cells[neighbor] === color) {
-                    stack.push(neighbor)
-                }
-            })
-        }
-    }
-    return visited
-
-}
-
-const getNeighbors = (cells: string[], index: number) => {
-    // check if at a natural boundary - then check if the
-    let neighbors: number[] = []
-    for (let i = -1; i <= 1; i++) {
-        const {x, y} = {x: index % cols, y: Math.floor(index / cols)}
-        console.log(x, y)
-        if (!(y === 0 && i < 0) && !(y === rows - 1 && i > 0)) {
-            for (let j = -1; j <= 1; j++) {
-                if (!(x === 0 && j < 0) && !(x === cols - 1 && j > 0)) {
-                    if (!(i === 0 && j === 0)) {
-                        //If the grid is not a square the adjacent squares could cause a failure
-                        try {
-                            let neighbor = ((y + i) * rows) + (x + j)
-                            if (cells[neighbor] === cells[index]) {
-                                // the one would be replaced if weights were introduced
-                                neighbors.push(neighbor)
-                            }
-                        } catch (err) {
-                            console.error(err)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return neighbors
-}
-
-export const submitGridRequest = (curCells: string[], gridUrl: string) => {
+export const submitGridRequest = (curCells: string[]) => {
     const params = curCells.map(cell => cell.substring(1)).join(',')
-    fetch(`http://${gridUrl}:${config.gridPort}/colors/${params}`)
+    fetch(`http://${config.localGridAddress}:${config.gridPort}/colors/${params}`)
 }
 
 type tools = 'BRUSH' | 'BUCKET' | 'EYEDROP'
 
-
 export const LandingPage = () => {
     const classes = useStyles()
-    const [cells, setCells] = useState<string[]>(initialCells)
     const [color, setColor] = useState<string>('#00ff00')
     const [mouseDown, setMouseDown] = useState<boolean>(false)
     const [sideOpen, setSideOpen] = useState<boolean>(true)
@@ -129,12 +78,8 @@ export const LandingPage = () => {
     const [showShortcuts, setShowShortcuts] = useState<boolean>(false)
     const [colorDock, setColorDock] = useState<string[]>()
     const [colorDockIndex, setColorDockIndex] = useState<number>()
-    const [gridUrl, setGridUrl] = useState<string>(config.serverIp)
-    const [streamUrl, setStreamUrl] = useState<string>(config.serverIp)
 
-
-
-
+    const {cells, setCells, cols, rows} = usePixel()
 
     const keyDown = (event: KeyboardEvent) => {
         console.log(`${event.ctrlKey} ${event.key}`)
@@ -150,11 +95,6 @@ export const LandingPage = () => {
             redo()
         } else if (ctrl && key === 'z') {
             undo()
-        } else if (key === 'i'){
-            const newGridUrl = gridUrl === config.serverIp ? config.localGridAddress : config.serverIp
-            const newStreamUrl = streamUrl === config.serverIp ? config.localStreamAddress : config.serverIp
-            setGridUrl(newGridUrl)
-            setStreamUrl(newStreamUrl)
         } else if (event.shiftKey) {
             //grab object mode
         } else if (key === 'q') {
@@ -164,7 +104,7 @@ export const LandingPage = () => {
         } else if (key === 'e') {
             setTool('EYEDROP')
         } else if (key === 'Enter'){
-            submitGridRequest(cells, gridUrl)
+            submitGridRequest(cells)
         }
     }
 
@@ -230,7 +170,7 @@ export const LandingPage = () => {
 
 
     const bucketPaint = (index: number) => {
-        getNeighborChain(cells, index).map((cellIndex: number) => {
+        getNeighborChain(cells, index, cols, rows).map((cellIndex: number) => {
             setCellColor(cellIndex)
         })
     }
@@ -374,7 +314,7 @@ export const LandingPage = () => {
                         </Grid>
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
-                                <Button color="primary" variant="contained" onClick={() => submitGridRequest(cells, gridUrl)}>
+                                <Button color="primary" variant="contained" onClick={() => submitGridRequest(cells)}>
                                     Set LEDs
                                 </Button>
                                 </Grid>
@@ -422,17 +362,7 @@ export const LandingPage = () => {
                 <Paper square style={{ height: '100%'}}>
                     <Grid container direction="column" style={{height: '100%'}}>
                         <Grid item xs={12} style={{height: '100%', padding: '16px'}}>
-                            <Timebin setState={() => {
-                                        setCells(cells.slice())
-                                        }}
-                                     loop={loop}
-                                     executeOnStart={() => {
-                                        submitGridRequest(cells.slice(), gridUrl)}}
-                                     icon={ <JustGrid cells={cells} cols={cols} rows={rows}/> }
-                                     exportString={cells.slice().join(',')}
-                                     row={rows}
-                                     col={cols}
-                            />
+                            <Timebin cells={cells.slice()} cols={cols} rows={rows} loop={loop} setCells={setCells}/>
                         </Grid>
                     </Grid>
                 </Paper>
