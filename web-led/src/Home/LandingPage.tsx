@@ -5,14 +5,14 @@ import {SketchPicker} from 'react-color'
 import {makeStyles} from "@material-ui/styles";
 import Paper from '@material-ui/core/Paper'
 import Button from "@material-ui/core/Button";
-import FormatColorFillIcon from '@material-ui/icons/FormatColorFill';
-import BrushIcon from '@material-ui/icons/Brush';
-import ColorizeIcon from '@material-ui/icons/Colorize';
 import {Timebin} from '../Timebin/Timebin'
 import {useEventListener} from "../EventListenerHook/eventListener";
 import { config } from '../config';
-import {getNeighborChain} from "../PixelGrid/GridHelpers";
+import {getNeighborChain, hexToRGB, RGBToHex} from "../PixelGrid/GridHelpers";
 import usePixel from "../PixelGrid/pixel.hook";
+import {ToolType} from "./types";
+import {ToolPicker} from "./Tools";
+import {JustGrid} from "../JustGrid/JustGrid";
 
 const useStyles = makeStyles({
     mainPage: {
@@ -60,14 +60,13 @@ export const submitGridRequest = (curCells: string[]) => {
     fetch(`http://${config.localGridAddress}:${config.gridPort}/colors/${params}`)
 }
 
-type tools = 'BRUSH' | 'BUCKET' | 'EYEDROP'
 
 export const LandingPage = () => {
     const classes = useStyles()
     const [color, setColor] = useState<string>('#00ff00')
     const [mouseDown, setMouseDown] = useState<boolean>(false)
     const [sideOpen, setSideOpen] = useState<boolean>(true)
-    const [tool, setTool] = useState<tools>('BRUSH')
+    const [tool, setTool] = useState<ToolType>('BRUSH')
     const [loop, setLoop] = useState<boolean>(false)
     const [cellHistory, setCellHistory] = useState<string[][]>([])
     const [undoStack, setUndoStack] = useState<any[]>([])
@@ -104,6 +103,8 @@ export const LandingPage = () => {
             setTool('EYEDROP')
         } else if (key === 'Enter'){
             submitGridRequest(cells)
+        } else if (key === 'b') {
+            setTool('SHADER')
         }
     }
 
@@ -154,10 +155,10 @@ export const LandingPage = () => {
 
     }
 
-    const setCellColor = (index: number) => {
+    const setCellColor = (index: number, newColor: string = color) => {
         setCells(oldCells => {
             const newCells = oldCells.slice();
-            newCells[index] = color
+            newCells[index] = newColor
             return newCells
         })
     }
@@ -167,11 +168,18 @@ export const LandingPage = () => {
     }
 
 
-
     const bucketPaint = (index: number) => {
         getNeighborChain(cells, index, cols, rows).map((cellIndex: number) => {
             setCellColor(cellIndex)
         })
+    }
+
+    const shaderAction = (index: number) => {
+        let {red, green, blue} = hexToRGB(cells[index])
+        red = Math.floor(.9 * red)
+        green = Math.floor(.9 * green)
+        blue = Math.floor(.9 * blue)
+        setCellColor(index, RGBToHex({red, green, blue}))
     }
 
     const getOnClick = () => {
@@ -185,8 +193,12 @@ export const LandingPage = () => {
                     setColorByCell(index)
                     setTool("BRUSH")
                 }
+            // case "SHADER":
+            //     return (index: number) => {
+            //         shaderAction(index)
+            //     }
             default:
-                return setCellColor
+                return (index: number) => {}
         }
     }
 
@@ -218,6 +230,10 @@ export const LandingPage = () => {
             else if (tool === 'BUCKET') {
                 pushCellHistory()
             }
+            else if (tool === 'SHADER') {
+                shaderAction(index)
+                pushCellHistory()
+            }
         }
 
     }
@@ -239,6 +255,8 @@ export const LandingPage = () => {
             switch (tool) {
                 case "BRUSH":
                     return setCellColor
+                case "SHADER":
+                    return shaderAction
                 default:
                     return (index: number) => {
                     }
@@ -275,33 +293,34 @@ export const LandingPage = () => {
                 <Paper square style={{height: '100%'}}>
                 <Grid container justify="center">
                     <Grid item xs={9}>
-                        <Grid container direction="row">
+                        <Grid container direction="row" justify="center">
                                 <SketchPicker color={color} onChange={(newColor: any) => {
                                     setColor(newColor.hex)
                                 }}/>
                             <Grid item xs={12} style={{padding: '16px 0px'}}>
-                                    <Grid container
-                                          justify="space-between"
-                                          alignItems="center"
-                                          spacing={2}>
+                                <ToolPicker tool={tool} setTool={setTool} showShortcuts={showShortcuts} />
+                                    {/*<Grid container*/}
+                                    {/*      justify="space-between"*/}
+                                    {/*      alignItems="center"*/}
+                                    {/*      spacing={2}>*/}
 
-                                        <Grid item xs={6}>
-                                            <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}
-                                                    onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'a'}
-                                            </Button>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}
-                                                    onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'q'}
-                                            </Button>
-                                            </Grid>
-                                        <Grid item xs={6}>
-                                        <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}
-                                                onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}
-                                        </Button>
-                                        </Grid>
+                                    {/*    <Grid item xs={6}>*/}
+                                    {/*        <Button variant={tool === 'BUCKET' ? "contained" : "outlined"}*/}
+                                    {/*                onClick={() => setTool("BUCKET")}><FormatColorFillIcon/>{showShortcuts && 'a'}*/}
+                                    {/*        </Button>*/}
+                                    {/*    </Grid>*/}
+                                    {/*    <Grid item xs={6}>*/}
+                                    {/*        <Button variant={tool === 'BRUSH' ? "contained" : "outlined"}*/}
+                                    {/*                onClick={() => setTool("BRUSH")}><BrushIcon/>{showShortcuts && 'q'}*/}
+                                    {/*        </Button>*/}
+                                    {/*        </Grid>*/}
+                                    {/*    <Grid item xs={6}>*/}
+                                    {/*    <Button variant={tool === 'EYEDROP' ? "contained" : "outlined"}*/}
+                                    {/*            onClick={() => setTool("EYEDROP")}><ColorizeIcon/>{showShortcuts && 'e'}*/}
+                                    {/*    </Button>*/}
+                                    {/*    </Grid>*/}
 
-                                    </Grid>
+                                    {/*</Grid>*/}
                             </Grid>
                             {/*<Grid item>*/}
                             {/*    <div style={{border: '2px solid'}}>*/}
@@ -344,6 +363,9 @@ export const LandingPage = () => {
                            onMouseLeave={() =>
                                setMouseDown(false)}>
                         <div style={{height: '100%', width:'100%', flex:'1'}}>
+                            <div style={{opacity: '.5'}}>
+                                <JustGrid cells={cells} cols={cols} rows={rows}/>
+                            </div>
                             <PixelGrid cols={cols}
                                        rows={rows}
                                        cells={cells}

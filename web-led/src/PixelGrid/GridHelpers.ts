@@ -46,3 +46,35 @@ export const getNeighborChain = (cells: string[], index: number, cols: number, r
     }
     return visited
 }
+
+export const hexToRGB = (hex: string = '#000000') => {
+    let r = 0
+    let g = 0
+    let b = 0
+    if(hex.length === 4) {
+        hex = hex.substring(1)
+    }
+    if(hex.length === 3) {
+        r = parseInt( hex[0], 16)
+        g = parseInt(hex[1], 16)
+        b = parseInt(hex[2], 16)
+    }
+    if(hex.length === 7) {
+        hex = hex.substring(1)
+    }
+    if(hex.length === 6) {
+        r = parseInt(hex[0] + hex[1], 16)
+        g = parseInt(hex[2] + hex[3], 16)
+        b = parseInt(hex[4] + hex[5], 16)
+    }
+
+    return {red: r, green: g, blue: b}
+}
+
+export const RGBToHex= (rgb: any) => {
+    const {red, green, blue} = rgb
+    let redHex = red.toString(16).padStart(2, '0')
+    let greenHex = green.toString(16).padStart(2, '0')
+    let blueHex = blue.toString(16).padStart(2, '0')
+    return '#' + redHex + greenHex + blueHex
+}

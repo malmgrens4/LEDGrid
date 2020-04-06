@@ -1,0 +1,1 @@
+export type ToolType = 'BRUSH' | 'BUCKET' | 'EYEDROP' | 'SHADER'

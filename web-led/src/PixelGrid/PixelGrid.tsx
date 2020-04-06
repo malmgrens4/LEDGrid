@@ -68,7 +68,6 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
                                onMouseDown={() => {
                                    onCellDown(cellIndex)
                                }}
-
                                onMouseUp={() => {
                                    onCellUp(cellIndex)
                                }}

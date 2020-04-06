@@ -14,6 +14,10 @@ import {SnapshotType} from './types'
 import {ImportExport} from "../ImportExport/ImportExport";
 import {JustGrid} from "../JustGrid/JustGrid";
 import {submitGridRequest} from "../Home/LandingPage";
+import Checkbox from "@material-ui/core/Checkbox";
+import LayersIcon from '@material-ui/icons/Layers';
+import LayersClearIcon from '@material-ui/icons/LayersClear';
+
 
 const useStyles = makeStyles({
     snapshots: {
@@ -123,15 +127,21 @@ const AnimationPreview = ({snapshots, fps, setFps, cols, rows}: any) => {
     return (
         <>
             <Grid item>
-                <div className={`${classes.snapshotDisplay}`}>
-                    {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
-                        <JustGrid cells={snapshots[simulationIndex].cells} cols={cols} rows={rows}/>
-                    </div>}
-                </div>
+                <Grid container direction="column" justify="center" alignItems="center" spacing={1}>
+                    <Grid item xs={12}>
+                        <div className={`${classes.snapshotDisplay}`}>
+                            {snapshots.length > 0 && snapshots[simulationIndex] && <div className={classes.snapshotDisplay}>
+                                <JustGrid cells={snapshots[simulationIndex].cells} cols={cols} rows={rows}/>
+                            </div>}
+                        </div>
+                    </Grid>
+                </Grid>
             </Grid>
+
             <Grid container justify="center" spacing={3}>
             <Grid item xs={8}>
-            <InputLabel>FPS</InputLabel>
+                <div style={{padding: '4px'}}>
+                <InputLabel>FPS</InputLabel>
                 <Slider
                     value={typeof fps === 'number' ? fps : 0.1}
                     onChange={handleSliderChange}
@@ -140,23 +150,26 @@ const AnimationPreview = ({snapshots, fps, setFps, cols, rows}: any) => {
                     max={15}
                     aria-labelledby="input-slider"
                 />
+                </div>
             </Grid>
                 <Grid item xs={4}>
-                <Input
-                    value={fps}
-                    margin="dense"
-                    onBlur={handleBlur}
-                    onChange={handleInputChange}
-                    inputProps={{
-                        step: .1,
-                            min: .1,
-                            max: 15,
-                            type: 'number',
-                            'aria-labelledby': 'input-slider',
-                    }}
-                />
-        </Grid>
-        </Grid>
+                    <div style={{padding: '4px'}}>
+                        <Input
+                            value={fps}
+                            margin="dense"
+                            onBlur={handleBlur}
+                            onChange={handleInputChange}
+                            inputProps={{
+                                step: .1,
+                                    min: .1,
+                                    max: 15,
+                                    type: 'number',
+                                    'aria-labelledby': 'input-slider',
+                            }}
+                        />
+                    </div>
+            </Grid>
+            </Grid>
         </>
     )
 }
