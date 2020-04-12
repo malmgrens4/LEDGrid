@@ -253,6 +253,12 @@ export const LandingPage = () => {
         }
     }
 
+    const QuadrantMirrorAction = (index: number) => {
+        XMirrorAction(index)
+        YMirrorAction(index)
+        YMirrorAction(getXMirrorCellIndex(index))
+    }
+
     const getOnCellDown = () => {
         return (index: number) => {
             if (tool === 'BRUSH') {
@@ -274,6 +280,10 @@ export const LandingPage = () => {
                 YMirrorAction(index)
                 pushCellHistory()
             }
+            else if (tool === 'QUADRANTMIRROR') {
+                QuadrantMirrorAction(index)
+                pushCellHistory()
+            }
         }
 
     }
@@ -292,25 +302,32 @@ export const LandingPage = () => {
             if (!dragging) {
                 setDragging(true)
             }
-            switch (tool) {
-                case "BRUSH":
-                    return setCellColor
-                case "SHADER":
-                    return shaderAction
-                case "XMIRROR":
-                    return XMirrorAction
-                case "YMIRROR":
-                    return YMirrorAction
-                default:
-                    return (index: number) => {
-
-                    }
+            if (tool === "BRUSH") {
+                return (index: number) => {setCellColor(index)}
             }
+            else if (tool ==="SHADER") {
+                return (index: number) => shaderAction(index)
+            }
+            else if (tool === "XMIRROR") {
+                return (index: number) => XMirrorAction(index)
+            }
+            else if (tool === "YMIRROR") {
+                return (index: number) => YMirrorAction(index)
+            }
+            else if (tool === "QUADRANTMIRROR") {
+                return (index: number) => {
+                    QuadrantMirrorAction(index)
+                }
+            }
+            else {
+                return (index: number) => {}
+            }
+
+        }
+        else{
+            return (index: number) => {}
         }
         // if the mouse is up then we cap the capture for the currentImage
-
-        return (index: number) => {
-        }
     }
 
     const addToCurrentImage = (index: number) => {

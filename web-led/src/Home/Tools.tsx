@@ -6,6 +6,8 @@ import BrushIcon from '@material-ui/icons/Brush';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import WbSunny from '@material-ui/icons/WbSunny';
 import BorderVerticalIcon from '@material-ui/icons/BorderVertical';
+import BorderHorizontalIcon from '@material-ui/icons/BorderHorizontal';
+import BorderInnerIcon from '@material-ui/icons/BorderInner';
 
 import {ToolType} from "./types";
 
@@ -54,10 +56,15 @@ export const ToolPicker = ({tool, setTool, showShortcuts}: ToolPickerProps) => {
 
             <Grid item xs={6} style={{justifyContent: 'center', display: 'flex'}}>
                 <Button variant={tool === 'YMIRROR' ? "contained" : "outlined"}
-                        onClick={() => setTool("YMIRROR")}><BorderVerticalIcon/>{showShortcuts && 'x'}
+                        onClick={() => setTool("YMIRROR")}><BorderHorizontalIcon/>{showShortcuts && 'x'}
                 </Button>
             </Grid>
 
+            <Grid item xs={6} style={{justifyContent: 'center', display: 'flex'}}>
+                <Button variant={tool === 'QUADRANTMIRROR' ? "contained" : "outlined"}
+                        onClick={() => setTool("QUADRANTMIRROR")}><BorderInnerIcon/>{showShortcuts && 'x'}
+                </Button>
+            </Grid>
         </Grid>
     )
 }
