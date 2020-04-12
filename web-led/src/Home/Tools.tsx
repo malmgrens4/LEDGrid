@@ -5,6 +5,7 @@ import FormatColorFillIcon from '@material-ui/icons/FormatColorFill';
 import BrushIcon from '@material-ui/icons/Brush';
 import ColorizeIcon from '@material-ui/icons/Colorize';
 import WbSunny from '@material-ui/icons/WbSunny';
+import BorderVerticalIcon from '@material-ui/icons/BorderVertical';
 
 import {ToolType} from "./types";
 
@@ -42,6 +43,18 @@ export const ToolPicker = ({tool, setTool, showShortcuts}: ToolPickerProps) => {
             <Grid item xs={6} style={{justifyContent: 'center', display: 'flex'}}>
                 <Button variant={tool === 'SHADER' ? "contained" : "outlined"}
                         onClick={() => setTool("SHADER")}><WbSunny/>{showShortcuts && 'b'}
+                </Button>
+            </Grid>
+
+            <Grid item xs={6} style={{justifyContent: 'center', display: 'flex'}}>
+                <Button variant={tool === 'XMIRROR' ? "contained" : "outlined"}
+                        onClick={() => setTool("XMIRROR")}><BorderVerticalIcon/>{showShortcuts && 'x'}
+                </Button>
+            </Grid>
+
+            <Grid item xs={6} style={{justifyContent: 'center', display: 'flex'}}>
+                <Button variant={tool === 'YMIRROR' ? "contained" : "outlined"}
+                        onClick={() => setTool("YMIRROR")}><BorderVerticalIcon/>{showShortcuts && 'x'}
                 </Button>
             </Grid>
 

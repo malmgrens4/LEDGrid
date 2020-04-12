@@ -9,7 +9,7 @@ import {Timebin} from '../Timebin/Timebin'
 import {useEventListener} from "../EventListenerHook/eventListener";
 import { config } from '../config';
 import {getNeighborChain, hexToRGB, RGBToHex} from "../PixelGrid/GridHelpers";
-import usePixel from "../PixelGrid/pixel.hook";
+import useCells from "../PixelGrid/pixel.hook";
 import {ToolType} from "./types";
 import {ToolPicker} from "./Tools";
 import {JustGrid} from "../JustGrid/JustGrid";
@@ -44,16 +44,6 @@ const useStyles = makeStyles({
     }
 })
 
-const cols = 11
-const rows = 11
-const initialCells: string[] = []
-
-for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-        const color = '#000'
-        initialCells.push(color)
-    }
-}
 
 export const submitGridRequest = (curCells: string[]) => {
     const params = curCells.map(cell => cell.substring(1)).join(',')
@@ -77,7 +67,7 @@ export const LandingPage = () => {
     const [colorDock, setColorDock] = useState<string[]>()
     const [colorDockIndex, setColorDockIndex] = useState<number>()
 
-    const {cells, setCells, cols, rows} = usePixel()
+    const {cells, setCells, cols, rows, clearCells} = useCells()
 
     const keyDown = (event: KeyboardEvent) => {
         console.log(`${event.ctrlKey} ${event.key}`)
@@ -193,6 +183,7 @@ export const LandingPage = () => {
                     setColorByCell(index)
                     setTool("BRUSH")
                 }
+
             // case "SHADER":
             //     return (index: number) => {
             //         shaderAction(index)
@@ -221,6 +212,47 @@ export const LandingPage = () => {
 
     }
 
+    const indexToCoordinates = (index: number): {x: number, y: number} => {
+        const y: number = Math.floor(index/cols)
+        const x: number = (index % cols)
+
+        return {x, y}
+    }
+
+    const coordinatesToIndex = (x: number, y: number): number => {
+        return (y * cols) + x
+    }
+
+    const getXMirrorCellIndex = (index: number) => {
+        const {x, y} = indexToCoordinates(index)
+        const secondCell = (cols - 1 - x) + (y * cols)
+        return secondCell
+    }
+
+    const getYMirrorCellIndex = (index: number) => {
+        const {x, y} = indexToCoordinates(index)
+        const secondCell = coordinatesToIndex(x, Math.abs(rows - 1 - y))
+        return secondCell
+    }
+
+    const XMirrorAction = (index: number) => {
+        const secondCell = getXMirrorCellIndex(index)
+
+        if(secondCell) {
+            setCellColor(index)
+            setCellColor(secondCell)
+        }
+    }
+
+    const YMirrorAction = (index: number) => {
+        const secondCell = getYMirrorCellIndex(index)
+
+        if(secondCell) {
+            setCellColor(index)
+            setCellColor(secondCell)
+        }
+    }
+
     const getOnCellDown = () => {
         return (index: number) => {
             if (tool === 'BRUSH') {
@@ -232,6 +264,14 @@ export const LandingPage = () => {
             }
             else if (tool === 'SHADER') {
                 shaderAction(index)
+                pushCellHistory()
+            }
+            else if (tool === 'XMIRROR') {
+                XMirrorAction(index)
+                pushCellHistory()
+            }
+            else if (tool === 'YMIRROR') {
+                YMirrorAction(index)
                 pushCellHistory()
             }
         }
@@ -257,8 +297,13 @@ export const LandingPage = () => {
                     return setCellColor
                 case "SHADER":
                     return shaderAction
+                case "XMIRROR":
+                    return XMirrorAction
+                case "YMIRROR":
+                    return YMirrorAction
                 default:
                     return (index: number) => {
+
                     }
             }
         }
@@ -274,16 +319,6 @@ export const LandingPage = () => {
             newImage.push(index)
             return newImage
         })
-    }
-
-    const clearCells = () => {
-        const newCells = []
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < cols; j++) {
-                newCells.push('#000000')
-            }
-        }
-        setCells(newCells)
     }
 
     return (
@@ -383,7 +418,7 @@ export const LandingPage = () => {
                 <Paper square style={{ height: '100%'}}>
                     <Grid container direction="column" style={{height: '100%'}}>
                         <Grid item xs={12} style={{height: '100%', padding: '16px'}}>
-                            <Timebin cells={cells.slice()} cols={cols} rows={rows} loop={loop} setCells={setCells}/>
+                            <Timebin cells={cells.slice()} cols={cols} rows={rows} loop={loop} setCells={setCells} clearCells={clearCells}/>
                         </Grid>
                     </Grid>
                 </Paper>

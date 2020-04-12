@@ -14,9 +14,6 @@ import {SnapshotType} from './types'
 import {ImportExport} from "../ImportExport/ImportExport";
 import {JustGrid} from "../JustGrid/JustGrid";
 import {submitGridRequest} from "../Home/LandingPage";
-import Checkbox from "@material-ui/core/Checkbox";
-import LayersIcon from '@material-ui/icons/Layers';
-import LayersClearIcon from '@material-ui/icons/LayersClear';
 
 
 const useStyles = makeStyles({
@@ -67,13 +64,14 @@ const useStyles = makeStyles({
 type Timebin = {
     cells: string[]
     setCells: (cells: string[]) => void
+    clearCells: () => void
     loop: boolean
     cols: number
     rows: number
 }
 
 
-const Snapshot = ({cells, cols, rows, deleteSnapshot, index, setCells}: any) => {
+const Snapshot = ({cells, cols, rows, deleteSnapshot, index, setCells, clearCells}: any) => {
     const classes = useStyles()
 
     return (
@@ -180,7 +178,7 @@ const scrollToRef = (innerElRef: RefObject<any>, parentElRef: RefObject<any>) =>
     }
 }
 
-export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
+export const Timebin = ({cells, cols, rows, loop, setCells, clearCells}: Timebin) => {
     const classes = useStyles()
 
     const [fps, setFps] = useState<number>(5)
@@ -215,6 +213,7 @@ export const Timebin = ({cells, cols, rows, loop, setCells}: Timebin) => {
             newSnapshots.push(newSnapshot)
             return newSnapshots
         })
+        clearCells()
         scrollToRef(addSnapRef, snapContainerRef)
     }
 

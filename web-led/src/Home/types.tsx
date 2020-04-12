@@ -1,1 +1,1 @@
-export type ToolType = 'BRUSH' | 'BUCKET' | 'EYEDROP' | 'SHADER'
+export type ToolType = 'BRUSH' | 'BUCKET' | 'EYEDROP' | 'SHADER' | 'XMIRROR' | 'YMIRROR'
