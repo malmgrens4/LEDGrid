@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 
-const initialCols = 11
-const initialRows = 11
+const initialCols = 12
+const initialRows = 12
 const initialCells: string[] = []
 
 for (let i = 0; i < initialRows; i++) {

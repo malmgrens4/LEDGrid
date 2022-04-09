@@ -2,6 +2,8 @@ import React, {useEffect, useState, useRef} from 'react';
 import {makeStyles} from '@material-ui/styles'
 import { useEventListener } from "../EventListenerHook/eventListener";
 import Autosizer from 'react-virtualized-auto-sizer'
+import { TouchEvent } from 'react';
+import { CropLandscapeOutlined } from '@material-ui/icons';
 
 const useStyles = makeStyles({
     grid: {
@@ -56,6 +58,21 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
         setHeight(Math.min(elWidth, elHeight) + 'px')
     }
 
+    const calculateCell = (data: TouchEvent) => {
+        const {clientX, clientY} = data.touches[0]
+        const element = document.elementFromPoint(clientX, clientY)
+        if(element && element.id && element?.parentElement?.parentElement?.parentElement?.id === 'grid') {
+            return parseInt(element.id)
+        }
+    }
+
+    const onTouchMove = (data: TouchEvent) => {
+        const cellIndex = calculateCell(data)
+        if(cellIndex) {
+            onCellEnter(cellIndex)
+        }
+    }
+
     useEventListener('resize', resize)
 
     // Go through each col in a row
@@ -64,7 +81,7 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
         for (let i = 0; i < cols; i++) {
             let cellIndex = (rowIndex * cols) + i
             let color = cells[cellIndex]
-            rowCells.push(<div className={classes.cell} key={cellIndex} style={{backgroundColor: `${color}`}}
+            rowCells.push(<div id={cellIndex.toString()} className={classes.cell} key={cellIndex} style={{backgroundColor: `${color}`}}
                                onMouseDown={() => {
                                    onCellDown(cellIndex)
                                }}
@@ -74,7 +91,10 @@ export const PixelGrid = ({cols, rows, cells, onCellClick, onCellEnter, onCellUp
                                onClick={() => onCellClick(cellIndex)}
                                onMouseEnter={() => {
                                    onCellEnter(cellIndex)
-                               }}>
+                               }}
+                               onTouchStart={() => onCellEnter(cellIndex)}
+                               onTouchEnd={() => onCellUp(cellIndex)}
+                               onTouchMove={(data) => onTouchMove(data)}>
                 <div className={classes.cellContent}></div>
             </div>)
         }
